@@ -17,6 +17,8 @@
     "prettier": "^3.3.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "styled-component": "^2.8.0",
+    "styled-components": "^6.1.12",
     "vite-plugin-eslint": "^1.8.1"
   },
   "devDependencies": {
