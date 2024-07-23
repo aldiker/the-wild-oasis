@@ -22,5 +22,6 @@ module.exports = {
             'warn',
             { vars: 'all', args: 'after-used', ignoreRestSiblings: false },
         ],
+        'no-constant-condition': ['warn'], // Изменение уровня ошибки на предупреждение
     },
 }
