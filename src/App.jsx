@@ -1,53 +1,38 @@
-import styled from 'styled-components'
-import GlobalStyle from './styles/GlobalStyles'
-import Button from './ui/Button'
-import Input from './ui/Input'
-import Heading from './ui/Heading'
-import Row from './ui/Row'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-const StyleApp = styled.div`
-    /* background-color: orangered; */
-    padding: 20px;
-`
+import GlobalStyles from './styles/GlobalStyles'
+import Dashboard from './pages/Dashboard'
+import Bookings from './pages/Bookings'
+import Cabins from './pages/Cabins'
+import Users from './pages/Users'
+import Settings from './pages/Settings'
+import Account from './pages/Account'
+import Login from './pages/Login'
+import PageNotFound from './pages/PageNotFound'
+import AppLayout from './ui/AppLayout'
 
 export default function App() {
     return (
         <>
-            <GlobalStyle />
-            <StyleApp>
-                <Row type="vertical">
-                    <Row type="horizontal">
-                        <Heading as="h1">The Wild Oasis</Heading>
-                        <div>
-                            <Heading as="h2">Check in to out</Heading>
-
-                            <Button onClick={() => alert('Hello')}>
-                                Check in
-                            </Button>
-                            <Button
-                                variation="secondary"
-                                size="medium"
-                                onClick={() => alert('Good Buy')}
-                            >
-                                Check out
-                            </Button>
-                        </div>
-                    </Row>
-                    <Row type="vertical">
-                        <Heading as="h3">Form</Heading>
-                        <div>
-                            <Input
-                                type="number"
-                                placeholder="Number of guests"
-                            />
-                            <Input
-                                type="number"
-                                placeholder="Number of guests"
-                            />
-                        </div>
-                    </Row>
-                </Row>
-            </StyleApp>
+            <GlobalStyles />
+            <BrowserRouter>
+                <Routes>
+                    <Route element={<AppLayout />}>
+                        <Route
+                            index
+                            element={<Navigate replace to="dashboard" />}
+                        />
+                        <Route path="dashboard" element={<Dashboard />} />
+                        <Route path="booking" element={<Bookings />} />
+                        <Route path="cabins" element={<Cabins />} />
+                        <Route path="users" element={<Users />} />
+                        <Route path="settings" element={<Settings />} />
+                        <Route path="account" element={<Account />} />
+                    </Route>
+                    <Route path="login" element={<Login />} />
+                    <Route path="*" element={<PageNotFound />} />
+                </Routes>
+            </BrowserRouter>
         </>
     )
 }
