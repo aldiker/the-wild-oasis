@@ -6,13 +6,21 @@ module.exports = {
         'plugin:react/recommended',
         'plugin:react/jsx-runtime',
         'plugin:react-hooks/recommended',
-        'plugin:prettier/recommended', // Добавление Prettier
-        'plugin:jsx-a11y/recommended', // Добавление правил для доступности
+        'plugin:prettier/recommended',
+        'plugin:jsx-a11y/recommended',
+        'plugin:@tanstack/eslint-plugin-query/recommended',
     ],
     ignorePatterns: ['dist', '.eslintrc.cjs'],
     parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
     settings: { react: { version: '18.2' } },
-    plugins: ['react-refresh', 'prettier', 'react', 'react-hooks', 'jsx-a11y'], // Добавление
+    plugins: [
+        'react-refresh',
+        'prettier',
+        'react',
+        'react-hooks',
+        'jsx-a11y',
+        '@tanstack/eslint-plugin-query',
+    ],
     rules: {
         'react-refresh/only-export-components': [
             'warn',
@@ -22,6 +30,6 @@ module.exports = {
             'warn',
             { vars: 'all', args: 'after-used', ignoreRestSiblings: false },
         ],
-        'no-constant-condition': ['warn'], // Изменение уровня ошибки на предупреждение
+        'no-constant-condition': ['warn'],
     },
 }
