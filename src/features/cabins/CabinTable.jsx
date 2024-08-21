@@ -42,8 +42,8 @@ export default function CabinTable() {
     if (isLoading) return <Spinner />
 
     return (
-        <Table>
-            <TableHeader>
+        <Table role="table">
+            <TableHeader role="row">
                 <div>Cabin</div>
                 <div>Capacity</div>
                 <div>Price</div>
