@@ -44,10 +44,12 @@ export default function CabinTable() {
     return (
         <Table role="table">
             <TableHeader role="row">
+                <div></div>
                 <div>Cabin</div>
                 <div>Capacity</div>
                 <div>Price</div>
                 <div>Discount</div>
+                <div></div>
             </TableHeader>
             {cabins.map((cabin) => (
                 <CabinRow cabin={cabin} key={cabin.id} />

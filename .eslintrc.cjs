@@ -31,5 +31,6 @@ module.exports = {
             { vars: 'all', args: 'after-used', ignoreRestSiblings: false },
         ],
         'no-constant-condition': ['warn'],
+        'react/prop-types': 'off',
     },
 }
