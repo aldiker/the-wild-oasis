@@ -12,6 +12,7 @@ const Table = styled.div`
     background-color: var(--color-grey-0);
     border-radius: 7px;
     overflow: hidden;
+    width: 100%;
 `
 
 const TableHeader = styled.header`
@@ -51,9 +52,9 @@ export default function CabinTable() {
                 <div>Discount</div>
                 <div></div>
             </TableHeader>
-            {/* {cabins.map((cabin) => (
+            {cabins.map((cabin) => (
                 <CabinRow cabin={cabin} key={cabin.id} />
-            ))} */}
+            ))}
         </Table>
     )
 }
