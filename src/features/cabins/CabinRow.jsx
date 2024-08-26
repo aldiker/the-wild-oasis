@@ -50,7 +50,7 @@ export default function CabinRow({ cabin }) {
         maxCapacity,
         regularPrice,
         discount,
-        discription,
+        description,
         image,
     } = cabin
 
