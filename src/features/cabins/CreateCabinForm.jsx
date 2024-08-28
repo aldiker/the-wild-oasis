@@ -29,7 +29,7 @@ export default function CreateCabinForm() {
     })
 
     function handleSubmitForm(data) {
-        mutate(data)
+        mutate({ ...data, image: data.image[0] })
     }
 
     function handleErrorForm(errors) {
