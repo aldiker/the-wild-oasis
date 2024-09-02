@@ -49,8 +49,12 @@ export default function CreateCabinForm({ cabinToEdit = {} }) {
     const isWorking = isCreating || isEditing
 
     function handleSubmitForm(data) {
-        if (isEditSession) editCabin({ ...data })
-        else createCabin({ ...data, image: data.image[0] })
+        const image =
+            typeof data.image === 'string' ? data.image : data.image[0]
+
+        if (isEditSession)
+            editCabin({ newCabinData: { ...data, image: image }, id: editId })
+        else createCabin({ ...data, image: image })
     }
 
     function handleErrorForm(errors) {
