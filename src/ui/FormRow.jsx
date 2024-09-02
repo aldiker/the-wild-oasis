@@ -41,6 +41,7 @@ export default function FormRow({ label, error, children }) {
         <StyledFormRow>
             {label && <Label htmlFor={children.props.id}>{label}</Label>}
             {children}
+
             {error && <Error> {error} </Error>}
         </StyledFormRow>
     )
