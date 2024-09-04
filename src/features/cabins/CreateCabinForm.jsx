@@ -12,8 +12,6 @@ import { useEditCabin } from './useEditCabin'
 
 export default function CreateCabinForm({ cabinToEdit = {} }) {
     const { id: editId, ...editValues } = cabinToEdit
-    console.log(`editId = ${editId}`)
-    console.log(editValues)
 
     const isEditSession = Boolean(editId)
 
