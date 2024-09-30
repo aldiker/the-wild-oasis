@@ -95,9 +95,7 @@ export default function CabinRow({ cabin }) {
                     <Modal.Window name="edit">
                         <CreateCabinForm cabinToEdit={cabin} />
                     </Modal.Window>
-                </Modal>
 
-                <Modal>
                     <Modal.Open opens="delete">
                         <button disabled={isDeleting}>
                             <HiTrash />
@@ -107,16 +105,10 @@ export default function CabinRow({ cabin }) {
                         <ConfirmDelete
                             resourceName="cabin"
                             disabled={isDeleting}
-                            onConfirm={() => console.log('Deleted!')}
+                            onConfirm={() => deleteCabin(cabinId)}
                         />
                     </Modal.Window>
                 </Modal>
-                {/* <button
-                    onClick={() => deleteCabin(cabinId)}
-                    disabled={isDeleting}
-                >
-                    <HiTrash />
-                </button> */}
             </div>
         </TableRow>
     )
