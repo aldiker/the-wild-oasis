@@ -67,7 +67,9 @@ const Guest = styled.div`
         color: var(--color-grey-700);
     }
 `
-
+// const Price = styled.div.withConfig({
+//     shouldForwardProp: (prop) => prop !== 'isPaid',
+// })`
 const Price = styled.div`
     display: flex;
     align-items: center;
@@ -77,9 +79,9 @@ const Price = styled.div`
     margin-top: 2.4rem;
 
     background-color: ${(props) =>
-        props.isPaid ? 'var(--color-green-100)' : 'var(--color-yellow-100)'};
+        props.$isPaid ? 'var(--color-green-100)' : 'var(--color-yellow-100)'};
     color: ${(props) =>
-        props.isPaid ? 'var(--color-green-700)' : 'var(--color-yellow-700)'};
+        props.$isPaid ? 'var(--color-green-700)' : 'var(--color-yellow-700)'};
 
     & p:last-child {
         text-transform: uppercase;
@@ -124,6 +126,8 @@ function BookingDataBox({ booking }) {
         },
         cabins: { name: cabinName },
     } = booking
+
+    console.log('isPaid = ', isPaid)
 
     return (
         <StyledBookingDataBox>
@@ -175,7 +179,7 @@ function BookingDataBox({ booking }) {
                     {hasBreakfast ? 'Yes' : 'No'}
                 </DataItem>
 
-                <Price isPaid={isPaid}>
+                <Price $isPaid={isPaid}>
                     <DataItem
                         icon={<HiOutlineCurrencyDollar />}
                         label={`Total price`}
