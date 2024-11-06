@@ -12,7 +12,7 @@ export function useLogin() {
         onSuccess: ({ user }) => {
             console.log(user)
             queryClient.setQueriesData(['user'], user)
-            navigation('/')
+            navigation('/', { replace: true })
         },
         onError: (err) => {
             console.log('ERROR', err)
