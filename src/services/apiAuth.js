@@ -14,10 +14,10 @@ export async function login({ email, password }) {
 
 export async function getUser() {
     const { data: session } = await supabase.auth.getSession()
+
     if (!session.session) return null
 
-    const { data, error } = supabase.auth.getUser()
-    console.log(data)
+    const { data, error } = await supabase.auth.getUser()
 
     if (error) throw new Error(error.message)
 
