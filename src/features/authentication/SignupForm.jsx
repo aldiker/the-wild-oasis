@@ -3,15 +3,18 @@ import Button from '../../ui/Button'
 import Form from '../../ui/Form'
 import FormRow from '../../ui/FormRow'
 import Input from '../../ui/Input'
+import { useSignup } from './useSignup'
 
 // Email regex: /\S+@\S+\.\S+/
 
 export default function SignupForm() {
-    const { register, formState, getValues, handleSubmit } = useForm()
+    const { register, formState, getValues, handleSubmit, reset } = useForm()
+    const { signup, isLoading } = useSignup()
+
     const { errors } = formState
 
-    function onSubmit(data) {
-        console.log(data)
+    function onSubmit({ fullName, email, password }) {
+        signup({ fullName, email, password }, { onSettled: () => reset() })
     }
 
     return (
