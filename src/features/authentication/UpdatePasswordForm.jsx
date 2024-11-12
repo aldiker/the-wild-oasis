@@ -6,7 +6,7 @@ import Input from '../../ui/Input'
 
 import { useUpdateUser } from './useUpdateUser'
 
-function UpdatePasswordForm() {
+export default function UpdatePasswordForm() {
     const { register, handleSubmit, formState, getValues, reset } = useForm()
     const { errors } = formState
 
@@ -63,5 +63,3 @@ function UpdatePasswordForm() {
         </Form>
     )
 }
-
-export default UpdatePasswordForm
