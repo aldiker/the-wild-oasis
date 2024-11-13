@@ -25,7 +25,22 @@ export default function UpdateUserDataForm() {
 
     function handleSubmit(e) {
         e.preventDefault()
-        if (fullName) updateUser({ fullName, avatar })
+        if (fullName)
+            updateUser(
+                { fullName, avatar },
+                {
+                    onSuccess: () => {
+                        setAvatar(null)
+                        setFullName(currentFullName)
+                        e.target.reset()
+                    },
+                },
+            )
+    }
+
+    function handleCancel() {
+        setAvatar(null)
+        setFullName(currentFullName)
     }
 
     return (
@@ -55,6 +70,7 @@ export default function UpdateUserDataForm() {
                     type="reset"
                     variation="secondary"
                     disabled={isUpdating}
+                    onClick={handleCancel}
                 >
                     Cancel
                 </Button>

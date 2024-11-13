@@ -6,7 +6,7 @@ export function useUser() {
         queryKey: ['user'],
         queryFn: getUser,
     })
-    console.log('useUser', user)
+    // console.log('useUser', user)
 
     return { user, isLoading, isAuthenticated: user?.role === 'authenticated' }
 }
