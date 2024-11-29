@@ -7,7 +7,7 @@ export function useOutsideClick(handler, listenCapturing = true) {
         function () {
             function handleClick(event) {
                 if (ref.current && !ref.current.contains(event.target)) {
-                    console.log('Click Outside!')
+                    // console.log('Click Outside!')
                     handler()
                 }
             }
