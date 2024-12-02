@@ -5,7 +5,7 @@ import { useUpdateSetting } from './useEditSetting'
 import { useSettings } from './useSettings'
 
 export default function UpdateSettingsForm() {
-    const { isLoading, settings = {} } = useSettings()
+    const { settings = {} } = useSettings()
     const {
         minBookingLength,
         maxBookingLength,

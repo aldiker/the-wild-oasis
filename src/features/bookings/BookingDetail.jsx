@@ -29,7 +29,7 @@ function BookingDetail() {
     const moveBack = useMoveBack()
     const navigate = useNavigate()
     const { checkout, isCheckingOut } = useCheckout()
-    const { deleteBooking, isDeleting } = useDeleteBooking()
+    const { deleteBooking } = useDeleteBooking()
 
     if (isLoading) return <Spinner />
     if (!booking) return <Empty resourceName="booking" />

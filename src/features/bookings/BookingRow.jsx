@@ -49,11 +49,11 @@ const Amount = styled.div`
 export default function BookingRow({
     booking: {
         id: bookingId,
-        created_at,
+        // created_at,
         startDate,
         endDate,
         numNights,
-        numGuests,
+        // numGuests,
         totalPrice,
         status,
         guests: { fullName: guestName, email },
@@ -62,7 +62,7 @@ export default function BookingRow({
 }) {
     const navigate = useNavigate()
     const { checkout, isCheckingOut } = useCheckout()
-    const { deleteBooking, isDeleting } = useDeleteBooking()
+    const { deleteBooking } = useDeleteBooking()
 
     const statusToTagName = {
         unconfirmed: 'blue',
