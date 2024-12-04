@@ -8,6 +8,8 @@ import Textarea from '../../ui/Textarea'
 import FormRow from '../../ui/FormRow'
 import Heading from '../../ui/Heading'
 import { useGuests } from '../guests/useGuests'
+import { useState } from 'react'
+import { ListSelect } from '../../ui/ListSelect'
 
 // import { useCreateCabin } from './useCreateCabin'
 // import { useEditCabin } from './useEditCabin'
@@ -18,6 +20,30 @@ export default function CreateBookingForm({ onClose }) {
 
     const { isLoading, isError, guests } = useGuests()
     console.log(guests)
+    // console.log('guest', getValues().guest)
+
+    const [filteredGuests, setFilteredGuests] = useState([])
+    const [showDropdown, setShowDropdown] = useState(false)
+
+    const handleInputChange = () => {
+        const inputValue = getValues().guest
+
+        if (inputValue.trim() === '') {
+            setFilteredGuests([])
+            setShowDropdown(false)
+            return
+        }
+
+        // // Фильтруем гостей по имени
+        const filtered = guests.filter((guest) =>
+            guest.fullName.toLowerCase().includes(inputValue.toLowerCase()),
+        )
+
+        console.log(filtered)
+
+        setFilteredGuests(filtered)
+        setShowDropdown(filtered.length > 0)
+    }
 
     const isWorking = isLoading
 
@@ -44,8 +70,10 @@ export default function CreateBookingForm({ onClose }) {
                     // defaultValue={editValues?.name}
                     {...register('guest', {
                         required: 'This field is required',
+                        onChange: handleInputChange,
                     })}
                 />
+                <ListSelect></ListSelect>
             </FormRow>
 
             {/* <FormRow label="Guest:" error={errors?.guestId?.message}>
