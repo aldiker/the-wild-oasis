@@ -34,7 +34,7 @@ export default function CreateCabinForm({ cabinToEdit = {}, onClose }) {
                 { newCabinData: { ...data, image: image }, id: editId },
                 {
                     onSuccess: (data) => {
-                        console.log(data)
+                        // console.log(data)
                         reset()
                         onClose?.()
                     },
@@ -45,7 +45,7 @@ export default function CreateCabinForm({ cabinToEdit = {}, onClose }) {
                 { ...data, image: image },
                 {
                     onSuccess: (data) => {
-                        console.log(data)
+                        // console.log(data)
                         reset()
                         onClose?.()
                     },

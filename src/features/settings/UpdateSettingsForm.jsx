@@ -16,7 +16,7 @@ export default function UpdateSettingsForm() {
     const { isUpdating, updateSetting } = useUpdateSetting()
 
     function handleUpdate(event, field) {
-        console.log(event)
+        // console.log(event)
 
         const { value } = event.target
 

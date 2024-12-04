@@ -127,7 +127,7 @@ function BookingDataBox({ booking }) {
         cabins: { name: cabinName },
     } = booking
 
-    console.log('isPaid = ', isPaid)
+    // console.log('isPaid = ', isPaid)
 
     return (
         <StyledBookingDataBox>

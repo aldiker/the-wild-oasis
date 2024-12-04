@@ -29,7 +29,7 @@ export async function getBookings({ filter, sortBy, page }) {
 
     const { data, error, count } = await query
 
-    console.log('In getBookings we have count: ', count)
+    // console.log('In getBookings we have count: ', count)
 
     if (error) {
         console.log(error)

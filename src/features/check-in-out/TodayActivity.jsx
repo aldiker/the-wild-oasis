@@ -41,8 +41,8 @@ const NoActivity = styled.p`
 
 function TodayActivity() {
     const { todayActivities, isLoading } = useTodayActivity()
-    console.log('todayActivities')
-    console.log(todayActivities)
+    // console.log('todayActivities')
+    // console.log(todayActivities)
 
     return (
         <StyledToday>
