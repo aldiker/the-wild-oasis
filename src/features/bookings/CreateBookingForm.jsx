@@ -13,6 +13,7 @@ import { useRef, useState } from 'react'
 // import { ListSelect } from '../../ui/ListSelect'
 // import MenusSelect from '../../ui/MenusSelect'
 import styled from 'styled-components'
+import DropdownList from '../../ui/DropdownList'
 
 // import { useCreateCabin } from './useCreateCabin'
 // import { useEditCabin } from './useEditCabin'
@@ -66,9 +67,10 @@ export default function CreateBookingForm({ onClose }) {
     const { errors } = formState
 
     const { isLoading, isError, guests } = useGuests()
-    console.log('guests: ', guests)
+    // console.log('guests: ', guests)
 
     const inputRef = useRef(null)
+    const formRef = useRef(null)
 
     const [filteredGuests, setFilteredGuests] = useState([])
     const [searchListId, setSearchListId] = useState('')
@@ -76,7 +78,7 @@ export default function CreateBookingForm({ onClose }) {
 
     const handleInputChange = () => {
         const inputValue = getValues().guest
-        console.log('guest', inputValue)
+        // console.log('guest', inputValue)
 
         if (inputValue.trim() === '') {
             setFilteredGuests([])
@@ -94,12 +96,20 @@ export default function CreateBookingForm({ onClose }) {
         setFilteredGuests(filtered)
         setSearchListId(filtered.length > 0 ? 'guest' : '')
 
-        console.log('InputRef.current: ', inputRef.current)
+        console.log('inputRef.current: ', inputRef.current)
+        console.log('rectForm.current: ', formRef.current)
 
         if (inputRef.current) {
-            const rect = inputRef.current.getBoundingClientRect()
-            console.log('rect', rect)
-            setSearchListPosition({ x: rect.left, y: rect.bottom + 4 })
+            const rectInput = inputRef.current.getBoundingClientRect()
+            console.log('rectInput', rectInput)
+            const rectForm = formRef.current.getBoundingClientRect()
+            console.log('rectForm', rectForm)
+            // Позиция поля ввода относительно формы
+            const relativeX = rectInput.left - rectForm.left
+            const relativeY = rectInput.bottom - rectForm.top
+
+            setSearchListPosition({ x: relativeX + 40, y: relativeY + 32 })
+            // setSearchListPosition({ x: 0, y: 0 })
         }
     }
 
@@ -114,7 +124,7 @@ export default function CreateBookingForm({ onClose }) {
     }
 
     return (
-        <div>
+        <div ref={formRef}>
             <Form
                 onSubmit={handleSubmit(handleSubmitForm, handleErrorForm)}
                 type={onClose ? 'modal' : 'regular'}
@@ -137,17 +147,13 @@ export default function CreateBookingForm({ onClose }) {
                         }}
                     />
                 </FormRow>
-                {searchListId === 'guest' &&
-                    createPortal(
-                        <SearchList position={searchListPosition}>
-                            {filteredGuests.map((guest) => (
-                                <SearchListItem key={guest.id}>
-                                    {guest.fullName}
-                                </SearchListItem>
-                            ))}
-                        </SearchList>,
-                        document.body,
-                    )}
+                {searchListId === 'guest' && (
+                    <DropdownList
+                        list={filteredGuests}
+                        position={searchListPosition}
+                        displayField="fullName"
+                    />
+                )}
 
                 <FormRow label="Cabin:" error={errors?.cabinId?.message}>
                     <Input
