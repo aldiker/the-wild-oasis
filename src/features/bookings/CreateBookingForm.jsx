@@ -1,36 +1,86 @@
 import { useForm } from 'react-hook-form'
+import { createPortal } from 'react-dom'
 
 import Input from '../../ui/Input'
 import Form from '../../ui/Form'
 import Button from '../../ui/Button'
 // import FileInput from '../../ui/FileInput'
-import Textarea from '../../ui/Textarea'
+// import Textarea from '../../ui/Textarea'
 import FormRow from '../../ui/FormRow'
 import Heading from '../../ui/Heading'
 import { useGuests } from '../guests/useGuests'
-import { useState } from 'react'
-import { ListSelect } from '../../ui/ListSelect'
+import { useRef, useState } from 'react'
+// import { ListSelect } from '../../ui/ListSelect'
+// import MenusSelect from '../../ui/MenusSelect'
+import styled from 'styled-components'
 
 // import { useCreateCabin } from './useCreateCabin'
 // import { useEditCabin } from './useEditCabin'
+
+const SearchList = styled.ul`
+    position: fixed;
+
+    background-color: var(--color-grey-0);
+    box-shadow: var(--shadow-md);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--color-grey-200);
+    padding: 0.5rem;
+    z-index: 2000;
+
+    left: ${(props) => props.position.x}px;
+    top: ${(props) => props.position.y}px;
+`
+
+const SearchListItem = styled.li`
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    font-size: 1.4rem;
+    transition: all 0.2s;
+
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+
+    &:hover {
+        background-color: var(--color-grey-50);
+    }
+
+    cursor: pointer;
+
+    &:not(:last-child) {
+        border-bottom: 1px solid var(--color-grey-100);
+    }
+    & svg {
+        width: 1.6rem;
+        height: 1.6rem;
+        color: var(--color-grey-400);
+        transition: all 0.3s;
+    }
+`
 
 export default function CreateBookingForm({ onClose }) {
     const { register, handleSubmit, reset, getValues, formState } = useForm()
     const { errors } = formState
 
     const { isLoading, isError, guests } = useGuests()
-    console.log(guests)
-    // console.log('guest', getValues().guest)
+    console.log('guests: ', guests)
+
+    const inputRef = useRef(null)
 
     const [filteredGuests, setFilteredGuests] = useState([])
-    const [showDropdown, setShowDropdown] = useState(false)
+    const [searchListId, setSearchListId] = useState('')
+    const [searchListPosition, setSearchListPosition] = useState({ x: 0, y: 0 })
 
     const handleInputChange = () => {
         const inputValue = getValues().guest
+        console.log('guest', inputValue)
 
         if (inputValue.trim() === '') {
             setFilteredGuests([])
-            setShowDropdown(false)
+            setSearchListId('')
             return
         }
 
@@ -39,10 +89,18 @@ export default function CreateBookingForm({ onClose }) {
             guest.fullName.toLowerCase().includes(inputValue.toLowerCase()),
         )
 
-        console.log(filtered)
+        console.log('filtered array:', filtered)
 
         setFilteredGuests(filtered)
-        setShowDropdown(filtered.length > 0)
+        setSearchListId(filtered.length > 0 ? 'guest' : '')
+
+        console.log('InputRef.current: ', inputRef.current)
+
+        if (inputRef.current) {
+            const rect = inputRef.current.getBoundingClientRect()
+            console.log('rect', rect)
+            setSearchListPosition({ x: rect.left, y: rect.bottom + 4 })
+        }
     }
 
     const isWorking = isLoading
@@ -56,27 +114,67 @@ export default function CreateBookingForm({ onClose }) {
     }
 
     return (
-        <Form
-            onSubmit={handleSubmit(handleSubmitForm, handleErrorForm)}
-            type={onClose ? 'modal' : 'regular'}
-        >
-            <Heading as="h1">Creating a new booking</Heading>
+        <div>
+            <Form
+                onSubmit={handleSubmit(handleSubmitForm, handleErrorForm)}
+                type={onClose ? 'modal' : 'regular'}
+            >
+                <Heading as="h1">Creating a new booking</Heading>
 
-            <FormRow label="Guest:" error={errors?.guest?.message}>
-                <Input
-                    type="text"
-                    id="guest"
-                    // disabled={isWorking}
-                    // defaultValue={editValues?.name}
-                    {...register('guest', {
-                        required: 'This field is required',
-                        onChange: handleInputChange,
-                    })}
-                />
-                <ListSelect></ListSelect>
-            </FormRow>
+                <FormRow label="Guest:" error={errors?.guest?.message}>
+                    <Input
+                        type="text"
+                        id="guest"
+                        // disabled={isWorking}
+                        // defaultValue={editValues?.name}
+                        {...register('guest', {
+                            required: 'This field is required',
+                            onChange: handleInputChange,
+                        })}
+                        ref={(e) => {
+                            register('guest').ref(e)
+                            inputRef.current = e
+                        }}
+                    />
+                </FormRow>
+                {searchListId === 'guest' &&
+                    createPortal(
+                        <SearchList position={searchListPosition}>
+                            {filteredGuests.map((guest) => (
+                                <SearchListItem key={guest.id}>
+                                    {guest.fullName}
+                                </SearchListItem>
+                            ))}
+                        </SearchList>,
+                        document.body,
+                    )}
 
-            {/* <FormRow label="Guest:" error={errors?.guestId?.message}>
+                <FormRow label="Cabin:" error={errors?.cabinId?.message}>
+                    <Input
+                        type="text"
+                        id="cabinId"
+                        // disabled={isWorking}
+                        // defaultValue={editValues?.name}
+                        {...register('cabinId', {
+                            required: 'This field is required',
+                        })}
+                    />
+                </FormRow>
+
+                {/* <StyledList>
+                <StyledButton>Emma</StyledButton>
+                <StyledButton>Sasha</StyledButton>
+            </StyledList> */}
+
+                {/* <MenusSelect.Menu>
+                    <MenusSelect.List id="guest">
+                        <MenusSelect.Button>111</MenusSelect.Button>
+                        <MenusSelect.Button>222</MenusSelect.Button>
+                        <MenusSelect.Button>333</MenusSelect.Button>
+                    </MenusSelect.List>
+                </MenusSelect.Menu> */}
+
+                {/* <FormRow label="Guest:" error={errors?.guestId?.message}>
                 <Input
                     type="text"
                     id="guestId"
@@ -88,7 +186,7 @@ export default function CreateBookingForm({ onClose }) {
                 />
             </FormRow> */}
 
-            {/* <FormRow label="cabinId" error={errors?.cabinId?.message}>
+                {/* <FormRow label="cabinId" error={errors?.cabinId?.message}>
                 <Input
                     type="text"
                     id="cabinId"
@@ -100,7 +198,7 @@ export default function CreateBookingForm({ onClose }) {
                 />
             </FormRow> */}
 
-            {/* 
+                {/* 
 
             <FormRow label="numGuests" error={errors?.numGuests?.message}>
                 <Input
@@ -175,7 +273,7 @@ export default function CreateBookingForm({ onClose }) {
                 />
             </FormRow> */}
 
-            {/* 
+                {/* 
             <FormRow
                 label="Maximum capacity"
                 error={errors?.maxCapacity?.message}
@@ -227,20 +325,21 @@ export default function CreateBookingForm({ onClose }) {
                 />
             </FormRow> */}
 
-            <FormRow>
-                <Button
-                    variation="secondary"
-                    type="reset"
-                    disabled={isWorking}
-                    onClick={() => {
-                        reset()
-                        onClose?.()
-                    }}
-                >
-                    Cancel
-                </Button>
-                <Button>Create new booking</Button>
-            </FormRow>
-        </Form>
+                <FormRow>
+                    <Button
+                        variation="secondary"
+                        type="reset"
+                        disabled={isWorking}
+                        onClick={() => {
+                            reset()
+                            onClose?.()
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button>Create new booking</Button>
+                </FormRow>
+            </Form>
+        </div>
     )
 }
