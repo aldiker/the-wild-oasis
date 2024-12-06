@@ -8,9 +8,10 @@ import Button from '../../ui/Button'
 import FormRow from '../../ui/FormRow'
 import Heading from '../../ui/Heading'
 import { useGuests } from '../guests/useGuests'
-import { useRef, useState } from 'react'
-import DropdownList from '../../ui/DropdownList_old'
+import { useRef } from 'react'
 import { useCabins } from '../cabins/useCabins'
+import { useDropdown } from '../../ui/Dropdown/useDropdown'
+import DropDownList from '../../ui/Dropdown/DropdownList'
 
 export default function CreateBookingForm({ onClose }) {
     const { register, handleSubmit, reset, getValues, formState, setValue } =
@@ -20,55 +21,17 @@ export default function CreateBookingForm({ onClose }) {
     const { isLoading: isLoadingGuests, guests } = useGuests()
     const { isLoading: isLoadingCabins, cabins } = useCabins()
 
-    const formRef = useRef(null)
+    const {
+        filtered,
+        listId,
+        position,
+        formRef,
+        handleInputChange,
+        closeDropdown,
+    } = useDropdown()
+
     const inputGuestRef = useRef(null)
     const inputCabinRef = useRef(null)
-
-    const [filtered, setFiltered] = useState([])
-    const [searchListId, setSearchListId] = useState('')
-    const [searchListPosition, setSearchListPosition] = useState({ x: 0, y: 0 })
-
-    const handleInputListChange = (listId, list, displayField, inputRef) => {
-        console.log('listId =', listId)
-
-        const inputValue = getValues()[listId]
-        console.log('input =', inputValue)
-
-        let filtered = []
-
-        if (inputValue === ' ') filtered = [...list]
-        else {
-            if (inputValue.trim() === '') {
-                setFiltered([])
-                setSearchListId('')
-                return
-            }
-            // Фильтруем список по displayField
-            filtered = list.filter((item) =>
-                item[displayField]
-                    .toLowerCase()
-                    .includes(inputValue.toLowerCase()),
-            )
-        }
-
-        console.log('filtered array:', filtered)
-
-        setFiltered(filtered)
-        setSearchListId(filtered.length > 0 ? listId : '')
-
-        console.log('inputRef = ', inputRef.current)
-        if (inputRef.current) {
-            const rectInput = inputRef.current.getBoundingClientRect()
-            const rectForm = formRef.current.getBoundingClientRect()
-
-            // Позиция поля ввода относительно формы
-            const relativeX = rectInput.left - rectForm.left
-            const relativeY = rectInput.bottom - rectForm.top
-
-            setSearchListPosition({ x: relativeX + 40, y: relativeY + 32 })
-            // setSearchListPosition({ x: 0, y: 0 })
-        }
-    }
 
     const isWorking = isLoadingGuests || isLoadingCabins
 
@@ -97,11 +60,12 @@ export default function CreateBookingForm({ onClose }) {
                         {...register('guest', {
                             required: 'This field is required',
                             onChange: () =>
-                                handleInputListChange(
-                                    'guest',
+                                handleInputChange(
+                                    getValues().guest,
                                     guests,
                                     'fullName',
                                     inputGuestRef,
+                                    'guest',
                                 ),
                         })}
                         ref={(e) => {
@@ -110,18 +74,22 @@ export default function CreateBookingForm({ onClose }) {
                         }}
                     />
                 </FormRow>
-                {searchListId === 'guest' && (
-                    <DropdownList
-                        list={filtered}
-                        position={searchListPosition}
-                        displayField="fullName"
-                        onClick={(selectedGuest) => {
-                            console.log('Selected guest:', selectedGuest)
-                            setValue('guest', selectedGuest)
-                            setFiltered([])
-                            setSearchListId('')
-                        }}
-                    />
+                {listId === 'guest' && (
+                    <DropDownList>
+                        <DropDownList.List position={position}>
+                            {filtered.map((guest) => (
+                                <DropDownList.Item
+                                    key={guest.id}
+                                    onClick={() => {
+                                        setValue('guest', guest.fullName)
+                                        closeDropdown()
+                                    }}
+                                >
+                                    {guest.fullName}
+                                </DropDownList.Item>
+                            ))}
+                        </DropDownList.List>
+                    </DropDownList>
                 )}
 
                 <FormRow label="Cabin:" error={errors?.cabin?.message}>
@@ -133,11 +101,12 @@ export default function CreateBookingForm({ onClose }) {
                         {...register('cabin', {
                             required: 'This field is required',
                             onChange: () =>
-                                handleInputListChange(
-                                    'cabin',
+                                handleInputChange(
+                                    getValues().cabin,
                                     cabins,
                                     'name',
                                     inputCabinRef,
+                                    'cabin',
                                 ),
                         })}
                         ref={(e) => {
@@ -146,18 +115,22 @@ export default function CreateBookingForm({ onClose }) {
                         }}
                     />
                 </FormRow>
-                {searchListId === 'cabin' && (
-                    <DropdownList
-                        list={filtered}
-                        position={searchListPosition}
-                        displayField="name"
-                        onClick={(selectedCabin) => {
-                            console.log('Selected cabin:', selectedCabin)
-                            setValue('cabin', selectedCabin)
-                            setFiltered([])
-                            setSearchListId('')
-                        }}
-                    />
+                {listId === 'cabin' && (
+                    <DropDownList>
+                        <DropDownList.List position={position}>
+                            {filtered.map((cabin) => (
+                                <DropDownList.Item
+                                    key={cabin.id}
+                                    onClick={() => {
+                                        setValue('cabin', cabin.name)
+                                        closeDropdown()
+                                    }}
+                                >
+                                    {cabin.name}
+                                </DropDownList.Item>
+                            ))}
+                        </DropDownList.List>
+                    </DropDownList>
                 )}
 
                 {/* <StyledList>
