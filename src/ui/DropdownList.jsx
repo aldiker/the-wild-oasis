@@ -46,10 +46,15 @@ const SearchListItem = styled.li`
     }
 `
 
-export default function DropdownList({ list, position, displayField }) {
+export default function DropdownList({
+    list,
+    position,
+    displayField,
+    onClick,
+}) {
     function handleClick(event) {
+        onClick(event.target.textContent)
         event.stopPropagation()
-        console.log('click - ', event.target)
     }
 
     return (

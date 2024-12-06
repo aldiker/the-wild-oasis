@@ -63,7 +63,8 @@ const SearchListItem = styled.li`
 `
 
 export default function CreateBookingForm({ onClose }) {
-    const { register, handleSubmit, reset, getValues, formState } = useForm()
+    const { register, handleSubmit, reset, getValues, formState, setValue } =
+        useForm()
     const { errors } = formState
 
     const { isLoading, isError, guests } = useGuests()
@@ -96,14 +97,15 @@ export default function CreateBookingForm({ onClose }) {
         setFilteredGuests(filtered)
         setSearchListId(filtered.length > 0 ? 'guest' : '')
 
-        console.log('inputRef.current: ', inputRef.current)
-        console.log('rectForm.current: ', formRef.current)
+        // console.log('inputRef.current: ', inputRef.current)
+        // console.log('rectForm.current: ', formRef.current)
 
         if (inputRef.current) {
             const rectInput = inputRef.current.getBoundingClientRect()
-            console.log('rectInput', rectInput)
             const rectForm = formRef.current.getBoundingClientRect()
-            console.log('rectForm', rectForm)
+            // console.log('rectInput', rectInput)
+            // console.log('rectForm', rectForm)
+
             // Позиция поля ввода относительно формы
             const relativeX = rectInput.left - rectForm.left
             const relativeY = rectInput.bottom - rectForm.top
@@ -152,6 +154,12 @@ export default function CreateBookingForm({ onClose }) {
                         list={filteredGuests}
                         position={searchListPosition}
                         displayField="fullName"
+                        onClick={(selectedGuest) => {
+                            console.log('Selected guest:', selectedGuest)
+                            setValue('guest', selectedGuest)
+                            setFilteredGuests([])
+                            setSearchListId('')
+                        }}
                     />
                 )}
 
@@ -332,6 +340,8 @@ export default function CreateBookingForm({ onClose }) {
             </FormRow> */}
 
                 <FormRow>
+                    {/* <Button>Create new guest</Button> */}
+
                     <Button
                         variation="secondary"
                         type="reset"
