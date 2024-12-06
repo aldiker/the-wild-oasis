@@ -1,5 +1,4 @@
 import { useForm } from 'react-hook-form'
-import { createPortal } from 'react-dom'
 
 import Input from '../../ui/Input'
 import Form from '../../ui/Form'
@@ -10,101 +9,57 @@ import FormRow from '../../ui/FormRow'
 import Heading from '../../ui/Heading'
 import { useGuests } from '../guests/useGuests'
 import { useRef, useState } from 'react'
-// import { ListSelect } from '../../ui/ListSelect'
-// import MenusSelect from '../../ui/MenusSelect'
-import styled from 'styled-components'
 import DropdownList from '../../ui/DropdownList'
-
-// import { useCreateCabin } from './useCreateCabin'
-// import { useEditCabin } from './useEditCabin'
-
-const SearchList = styled.ul`
-    position: fixed;
-
-    background-color: var(--color-grey-0);
-    box-shadow: var(--shadow-md);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--color-grey-200);
-    padding: 0.5rem;
-    z-index: 2000;
-
-    left: ${(props) => props.position.x}px;
-    top: ${(props) => props.position.y}px;
-`
-
-const SearchListItem = styled.li`
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    padding: 0.5rem 1.2rem;
-    font-size: 1.4rem;
-    transition: all 0.2s;
-
-    display: flex;
-    align-items: center;
-    gap: 1.6rem;
-
-    &:hover {
-        background-color: var(--color-grey-50);
-    }
-
-    cursor: pointer;
-
-    &:not(:last-child) {
-        border-bottom: 1px solid var(--color-grey-100);
-    }
-    & svg {
-        width: 1.6rem;
-        height: 1.6rem;
-        color: var(--color-grey-400);
-        transition: all 0.3s;
-    }
-`
+import { useCabins } from '../cabins/useCabins'
 
 export default function CreateBookingForm({ onClose }) {
     const { register, handleSubmit, reset, getValues, formState, setValue } =
         useForm()
     const { errors } = formState
 
-    const { isLoading, isError, guests } = useGuests()
-    // console.log('guests: ', guests)
+    const { isLoading: isLoadingGuests, guests } = useGuests()
+    const { isLoading: isLoadingCabins, cabins } = useCabins()
 
-    const inputRef = useRef(null)
     const formRef = useRef(null)
+    const inputGuestRef = useRef(null)
+    const inputCabinRef = useRef(null)
 
-    const [filteredGuests, setFilteredGuests] = useState([])
+    const [filtered, setFiltered] = useState([])
     const [searchListId, setSearchListId] = useState('')
     const [searchListPosition, setSearchListPosition] = useState({ x: 0, y: 0 })
 
-    const handleInputChange = () => {
-        const inputValue = getValues().guest
-        // console.log('guest', inputValue)
+    const handleInputListChange = (listId, list, displayField, inputRef) => {
+        console.log('listId =', listId)
 
-        if (inputValue.trim() === '') {
-            setFilteredGuests([])
-            setSearchListId('')
-            return
+        const inputValue = getValues()[listId]
+        console.log('input =', inputValue)
+
+        let filtered = []
+
+        if (inputValue === ' ') filtered = [...list]
+        else {
+            if (inputValue.trim() === '') {
+                setFiltered([])
+                setSearchListId('')
+                return
+            }
+            // Фильтруем список по displayField
+            filtered = list.filter((item) =>
+                item[displayField]
+                    .toLowerCase()
+                    .includes(inputValue.toLowerCase()),
+            )
         }
-
-        // // Фильтруем гостей по имени
-        const filtered = guests.filter((guest) =>
-            guest.fullName.toLowerCase().includes(inputValue.toLowerCase()),
-        )
 
         console.log('filtered array:', filtered)
 
-        setFilteredGuests(filtered)
-        setSearchListId(filtered.length > 0 ? 'guest' : '')
+        setFiltered(filtered)
+        setSearchListId(filtered.length > 0 ? listId : '')
 
-        // console.log('inputRef.current: ', inputRef.current)
-        // console.log('rectForm.current: ', formRef.current)
-
+        console.log('inputRef = ', inputRef.current)
         if (inputRef.current) {
             const rectInput = inputRef.current.getBoundingClientRect()
             const rectForm = formRef.current.getBoundingClientRect()
-            // console.log('rectInput', rectInput)
-            // console.log('rectForm', rectForm)
 
             // Позиция поля ввода относительно формы
             const relativeX = rectInput.left - rectForm.left
@@ -115,7 +70,7 @@ export default function CreateBookingForm({ onClose }) {
         }
     }
 
-    const isWorking = isLoading
+    const isWorking = isLoadingGuests || isLoadingCabins
 
     function handleSubmitForm(data) {
         console.log(data)
@@ -141,39 +96,69 @@ export default function CreateBookingForm({ onClose }) {
                         // defaultValue={editValues?.name}
                         {...register('guest', {
                             required: 'This field is required',
-                            onChange: handleInputChange,
+                            onChange: () =>
+                                handleInputListChange(
+                                    'guest',
+                                    guests,
+                                    'fullName',
+                                    inputGuestRef,
+                                ),
                         })}
                         ref={(e) => {
                             register('guest').ref(e)
-                            inputRef.current = e
+                            inputGuestRef.current = e
                         }}
                     />
                 </FormRow>
                 {searchListId === 'guest' && (
                     <DropdownList
-                        list={filteredGuests}
+                        list={filtered}
                         position={searchListPosition}
                         displayField="fullName"
                         onClick={(selectedGuest) => {
                             console.log('Selected guest:', selectedGuest)
                             setValue('guest', selectedGuest)
-                            setFilteredGuests([])
+                            setFiltered([])
                             setSearchListId('')
                         }}
                     />
                 )}
 
-                <FormRow label="Cabin:" error={errors?.cabinId?.message}>
+                <FormRow label="Cabin:" error={errors?.cabin?.message}>
                     <Input
                         type="text"
-                        id="cabinId"
+                        id="cabin"
                         // disabled={isWorking}
                         // defaultValue={editValues?.name}
-                        {...register('cabinId', {
+                        {...register('cabin', {
                             required: 'This field is required',
+                            onChange: () =>
+                                handleInputListChange(
+                                    'cabin',
+                                    cabins,
+                                    'name',
+                                    inputCabinRef,
+                                ),
                         })}
+                        ref={(e) => {
+                            register('cabin').ref(e)
+                            inputCabinRef.current = e
+                        }}
                     />
                 </FormRow>
+                {searchListId === 'cabin' && (
+                    <DropdownList
+                        list={filtered}
+                        position={searchListPosition}
+                        displayField="name"
+                        onClick={(selectedCabin) => {
+                            console.log('Selected cabin:', selectedCabin)
+                            setValue('cabin', selectedCabin)
+                            setFiltered([])
+                            setSearchListId('')
+                        }}
+                    />
+                )}
 
                 {/* <StyledList>
                 <StyledButton>Emma</StyledButton>
