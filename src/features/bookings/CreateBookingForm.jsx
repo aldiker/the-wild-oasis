@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 
 import Input from '../../ui/Input'
 import Form from '../../ui/Form'
@@ -13,9 +13,19 @@ import { useCabins } from '../cabins/useCabins'
 import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import DropDownList from '../../ui/Dropdown/DropdownList'
 
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+
 export default function CreateBookingForm({ onClose }) {
-    const { register, handleSubmit, reset, getValues, formState, setValue } =
-        useForm()
+    const {
+        register,
+        handleSubmit,
+        reset,
+        getValues,
+        formState,
+        setValue,
+        control,
+    } = useForm()
     const { errors } = formState
 
     const { isLoading: isLoadingGuests, guests } = useGuests()
@@ -133,42 +143,31 @@ export default function CreateBookingForm({ onClose }) {
                     </DropDownList>
                 )}
 
-                {/* <StyledList>
-                <StyledButton>Emma</StyledButton>
-                <StyledButton>Sasha</StyledButton>
-            </StyledList> */}
+                <FormRow label="Start Date:" error={errors?.startDate?.message}>
+                    {/* <Input
+                        type="text"
+                        id="startDate"
+                        // disabled={isWorking}
+                        // defaultValue={editValues?.name}
+                        {...register('startDate', {
+                            required: 'This field is required',
+                        })}
+                    /> */}
 
-                {/* <MenusSelect.Menu>
-                    <MenusSelect.List id="guest">
-                        <MenusSelect.Button>111</MenusSelect.Button>
-                        <MenusSelect.Button>222</MenusSelect.Button>
-                        <MenusSelect.Button>333</MenusSelect.Button>
-                    </MenusSelect.List>
-                </MenusSelect.Menu> */}
-
-                {/* <FormRow label="Guest:" error={errors?.guestId?.message}>
-                <Input
-                    type="text"
-                    id="guestId"
-                    // disabled={isWorking}
-                    // defaultValue={editValues?.name}
-                    {...register('guestId', {
-                        required: 'This field is required',
-                    })}
-                />
-            </FormRow> */}
-
-                {/* <FormRow label="cabinId" error={errors?.cabinId?.message}>
-                <Input
-                    type="text"
-                    id="cabinId"
-                    // disabled={isWorking}
-                    // defaultValue={editValues?.name}
-                    {...register('cabinId', {
-                        required: 'This field is required',
-                    })}
-                />
-            </FormRow> */}
+                    <Controller
+                        name="startDate"
+                        control={control}
+                        render={({ field }) => (
+                            <DatePicker
+                                {...field}
+                                selected={field.value}
+                                onChange={(date) => field.onChange(date)} // Уведомление react-hook-form
+                                customInput={<Input />} // Применение стилей
+                                dateFormat="dd.MM.yyyy"
+                            />
+                        )}
+                    />
+                </FormRow>
 
                 {/* 
 
