@@ -1,4 +1,4 @@
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 import Input from '../../ui/Input'
 import Form from '../../ui/Form'
@@ -13,19 +13,12 @@ import { useCabins } from '../cabins/useCabins'
 import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import DropDownList from '../../ui/Dropdown/DropdownList'
 
-import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { isAfter, isSameDay } from 'date-fns'
 
 export default function CreateBookingForm({ onClose }) {
-    const {
-        register,
-        handleSubmit,
-        reset,
-        getValues,
-        formState,
-        setValue,
-        control,
-    } = useForm()
+    const { register, handleSubmit, reset, getValues, formState, setValue } =
+        useForm()
     const { errors } = formState
 
     const { isLoading: isLoadingGuests, guests } = useGuests()
@@ -144,28 +137,53 @@ export default function CreateBookingForm({ onClose }) {
                 )}
 
                 <FormRow label="Start Date:" error={errors?.startDate?.message}>
-                    {/* <Input
-                        type="text"
+                    <Input
+                        type="date"
                         id="startDate"
                         // disabled={isWorking}
                         // defaultValue={editValues?.name}
                         {...register('startDate', {
                             required: 'This field is required',
-                        })}
-                    /> */}
+                            validate: (startDate) => {
+                                const currentDate = new Date()
+                                const startDateValue = new Date(startDate)
 
-                    <Controller
-                        name="startDate"
-                        control={control}
-                        render={({ field }) => (
-                            <DatePicker
-                                {...field}
-                                selected={field.value}
-                                onChange={(date) => field.onChange(date)} // Уведомление react-hook-form
-                                customInput={<Input />} // Применение стилей
-                                dateFormat="dd.MM.yyyy"
-                            />
-                        )}
+                                console.log('currentDate = ', currentDate)
+                                console.log('startDateValue = ', startDateValue)
+
+                                return (
+                                    isAfter(startDateValue, currentDate) ||
+                                    isSameDay(startDateValue, currentDate) ||
+                                    'Start date must be after current date'
+                                )
+                            },
+                        })}
+                    />
+                </FormRow>
+
+                <FormRow label="End Date:" error={errors?.endDate?.message}>
+                    <Input
+                        type="date"
+                        id="endDate"
+                        // disabled={isWorking}
+                        // defaultValue={editValues?.name}
+                        {...register('endDate', {
+                            required: 'This field is required',
+                            validate: (endDate) => {
+                                const startDateValue = new Date(
+                                    getValues('startDate'),
+                                )
+                                const endDateValue = new Date(endDate)
+
+                                console.log('startDateValue = ', startDateValue)
+                                console.log('endDateValue = ', endDateValue)
+
+                                return (
+                                    isAfter(endDateValue, startDateValue) ||
+                                    'End date must be after start date'
+                                )
+                            },
+                        })}
                     />
                 </FormRow>
 
