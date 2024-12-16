@@ -14,11 +14,20 @@ import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import DropDownList from '../../ui/Dropdown/DropdownList'
 
 import 'react-datepicker/dist/react-datepicker.css'
-import { isAfter, isSameDay } from 'date-fns'
+import { differenceInDays, isAfter, isSameDay, parseISO } from 'date-fns'
+import Checkbox from '../../ui/Checkbox'
+import { formatCurrency } from '../../utils/helpers'
 
 export default function CreateBookingForm({ onClose }) {
-    const { register, handleSubmit, reset, getValues, formState, setValue } =
-        useForm()
+    const {
+        register,
+        handleSubmit,
+        reset,
+        getValues,
+        formState,
+        setValue,
+        watch,
+    } = useForm()
     const { errors } = formState
 
     const { isLoading: isLoadingGuests, guests } = useGuests()
@@ -35,6 +44,18 @@ export default function CreateBookingForm({ onClose }) {
 
     const inputGuestRef = useRef(null)
     const inputCabinRef = useRef(null)
+
+    // Dates from form
+
+    // Слежение за датами
+    const startDate = watch('startDate')
+    const endDate = watch('endDate')
+
+    // Вычисление разницы в днях, когда изменяются startDate или endDate
+    const daysDifference =
+        startDate && endDate
+            ? differenceInDays(parseISO(endDate), parseISO(startDate))
+            : 0
 
     const isWorking = isLoadingGuests || isLoadingCabins
 
@@ -54,7 +75,11 @@ export default function CreateBookingForm({ onClose }) {
             >
                 <Heading as="h1">Creating a new booking</Heading>
 
-                <FormRow label="Guest:" error={errors?.guest?.message}>
+                <FormRow
+                    id="guest"
+                    label="Guest:"
+                    error={errors?.guest?.message}
+                >
                     <Input
                         type="text"
                         id="guest"
@@ -95,7 +120,11 @@ export default function CreateBookingForm({ onClose }) {
                     </DropDownList>
                 )}
 
-                <FormRow label="Cabin:" error={errors?.cabin?.message}>
+                <FormRow
+                    id="cabin"
+                    label="Cabin:"
+                    error={errors?.cabin?.message}
+                >
                     <Input
                         type="text"
                         id="cabin"
@@ -136,7 +165,11 @@ export default function CreateBookingForm({ onClose }) {
                     </DropDownList>
                 )}
 
-                <FormRow label="Start Date:" error={errors?.startDate?.message}>
+                <FormRow
+                    id="startDate"
+                    label="Start Date:"
+                    error={errors?.startDate?.message}
+                >
                     <Input
                         type="date"
                         id="startDate"
@@ -161,7 +194,11 @@ export default function CreateBookingForm({ onClose }) {
                     />
                 </FormRow>
 
-                <FormRow label="End Date:" error={errors?.endDate?.message}>
+                <FormRow
+                    id="endDate"
+                    label="End Date:"
+                    error={errors?.endDate?.message}
+                >
                     <Input
                         type="date"
                         id="endDate"
@@ -187,44 +224,56 @@ export default function CreateBookingForm({ onClose }) {
                     />
                 </FormRow>
 
-                {/* 
-
-            <FormRow label="numGuests" error={errors?.numGuests?.message}>
-                <Input
-                    type="text"
+                <FormRow
                     id="numGuests"
-                    // disabled={isWorking}
-                    // defaultValue={editValues?.name}
-                    {...register('numGuests', {
-                        required: 'This field is required',
-                    })}
-                />
-            </FormRow>
+                    label="Number of guests"
+                    error={errors?.numGuests?.message}
+                >
+                    <Input
+                        type="number"
+                        id="numGuests"
+                        // disabled={isWorking}
+                        // defaultValue={editValues?.name}
+                        {...register('numGuests', {
+                            required: 'This field is required',
+                            min: {
+                                value: 0,
+                                message: 'Guests should not be less 0',
+                            },
+                        })}
+                    />
+                </FormRow>
 
-            <FormRow label="startDate" error={errors?.startDate?.message}>
-                <Input
-                    type="text"
-                    id="startDate"
-                    // disabled={isWorking}
-                    // defaultValue={editValues?.name}
-                    {...register('startDate', {
-                        required: 'This field is required',
-                    })}
-                />
-            </FormRow>
+                <FormRow
+                    id="hasBreakfast"
+                    label="Want to add breakfast"
+                    error={errors?.hasBreakfast?.message}
+                >
+                    <Input
+                        type="checkbox"
+                        id="hasBreakfast"
+                        // disabled={isWorking}
+                        // defaultValue={editValues?.name}
+                        {...register('hasBreakfast', {})}
+                    />
+                    <span>For {daysDifference} days is equal 175$</span>
+                </FormRow>
 
-            <FormRow label="endDate" error={errors?.endDate?.message}>
-                <Input
-                    type="text"
-                    id="endDate"
-                    // disabled={isWorking}
-                    // defaultValue={editValues?.name}
-                    {...register('endDate', {
-                        required: 'This field is required',
-                    })}
-                />
-            </FormRow>
+                <FormRow
+                    label="Is this booking paid?"
+                    error={errors?.isPaid?.message}
+                >
+                    <Input
+                        type="checkbox"
+                        id="isPaid"
+                        // disabled={isWorking}
+                        // defaultValue={editValues?.name}
+                        {...register('isPaid', {})}
+                    />
+                </FormRow>
 
+                {/*
+            
             <FormRow label="hasBreakfast" error={errors?.hasBreakfast?.message}>
                 <Input
                     type="text"

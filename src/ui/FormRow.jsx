@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Label } from './Label'
 
 const StyledFormRow = styled.div`
     display: grid;
@@ -25,10 +26,15 @@ const StyledFormRow = styled.div`
         justify-content: flex-end;
         gap: 1.2rem;
     }
-`
 
-const Label = styled.label`
-    font-weight: 500;
+    &:has(input[type='checkbox']) {
+        grid-template-columns: 24rem 2rem 1fr 1.2fr;
+    }
+
+    // Только для блока ошибки — выравнивание по правому краю
+    /* & > span:last-child {
+        text-align: right;
+    } */
 `
 
 const Error = styled.span`
@@ -36,10 +42,10 @@ const Error = styled.span`
     color: var(--color-red-700);
 `
 
-export default function FormRow({ label, error, children }) {
+export default function FormRow({ id, label, error, children }) {
     return (
         <StyledFormRow>
-            {label && <Label htmlFor={children.props.id}>{label}</Label>}
+            {label && <Label htmlFor={id}>{label}</Label>}
             {children}
 
             {error && <Error> {error} </Error>}
