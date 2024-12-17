@@ -15,8 +15,8 @@ import DropDownList from '../../ui/Dropdown/DropdownList'
 
 import 'react-datepicker/dist/react-datepicker.css'
 import { differenceInDays, isAfter, isSameDay, parseISO } from 'date-fns'
-import Checkbox from '../../ui/Checkbox'
-import { formatCurrency } from '../../utils/helpers'
+import { formatCurrency, subtractDates } from '../../utils/helpers'
+import { useSettings } from '../settings/useSettings'
 
 export default function CreateBookingForm({ onClose }) {
     const {
@@ -33,6 +33,22 @@ export default function CreateBookingForm({ onClose }) {
     const { isLoading: isLoadingGuests, guests } = useGuests()
     const { isLoading: isLoadingCabins, cabins } = useCabins()
 
+    const { isLoading: isLoadingSettings, settings = {} } = useSettings()
+    // console.log('settings = ', settings)
+
+    //-------------------------------------------------
+    // Слежение за датами
+    const startDate = watch('startDate')
+    const endDate = watch('endDate')
+
+    // Вычисление разницы в днях, когда изменяются startDate или endDate
+    const daysDifference =
+        startDate && endDate ? subtractDates(endDate, startDate) : 0
+
+    const { breakfastPrice, minBookingLength, maxBookingLength } = settings
+    const breakfastAmmount = formatCurrency(breakfastPrice * daysDifference)
+    //-------------------------------------------------
+
     const {
         filtered,
         listId,
@@ -45,19 +61,7 @@ export default function CreateBookingForm({ onClose }) {
     const inputGuestRef = useRef(null)
     const inputCabinRef = useRef(null)
 
-    // Dates from form
-
-    // Слежение за датами
-    const startDate = watch('startDate')
-    const endDate = watch('endDate')
-
-    // Вычисление разницы в днях, когда изменяются startDate или endDate
-    const daysDifference =
-        startDate && endDate
-            ? differenceInDays(parseISO(endDate), parseISO(startDate))
-            : 0
-
-    const isWorking = isLoadingGuests || isLoadingCabins
+    const isWorking = isLoadingGuests || isLoadingCabins || isLoadingSettings
 
     function handleSubmitForm(data) {
         console.log(data)
@@ -207,18 +211,41 @@ export default function CreateBookingForm({ onClose }) {
                         {...register('endDate', {
                             required: 'This field is required',
                             validate: (endDate) => {
+                                // End date must be after start date
                                 const startDateValue = new Date(
                                     getValues('startDate'),
                                 )
                                 const endDateValue = new Date(endDate)
 
-                                console.log('startDateValue = ', startDateValue)
-                                console.log('endDateValue = ', endDateValue)
+                                // const daysDifference =
+                                //     startDateValue && endDateValue
+                                //         ? subtractDates(
+                                //               endDateValue,
+                                //               startDateValue,
+                                //           )
+                                //         : 0
 
-                                return (
-                                    isAfter(endDateValue, startDateValue) ||
-                                    'End date must be after start date'
+                                const daysDifference = differenceInDays(
+                                    endDateValue,
+                                    startDateValue,
                                 )
+
+                                console.log('startDateValue', startDateValue)
+                                console.log('endDateValue', endDateValue)
+                                console.log('daysDifference', daysDifference)
+
+                                if (isAfter(startDateValue, endDateValue))
+                                    return 'End date must be after start date'
+
+                                // Booking must be more minBookingLength
+                                if (daysDifference < minBookingLength)
+                                    return `Booking must be more ${minBookingLength}`
+                                // Booking must be less maxBookingLength
+                                if (daysDifference > maxBookingLength)
+                                    return `Booking must be less ${maxBookingLength}`
+
+                                // Если всё в порядке, возвращаем true
+                                return true
                             },
                         })}
                     />
@@ -256,7 +283,9 @@ export default function CreateBookingForm({ onClose }) {
                         // defaultValue={editValues?.name}
                         {...register('hasBreakfast', {})}
                     />
-                    <span>For {daysDifference} days is equal 175$</span>
+                    <span>
+                        For {daysDifference} days is {breakfastAmmount}
+                    </span>
                 </FormRow>
 
                 <FormRow
