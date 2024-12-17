@@ -8,7 +8,7 @@ import Button from '../../ui/Button'
 import FormRow from '../../ui/FormRow'
 import Heading from '../../ui/Heading'
 import { useGuests } from '../guests/useGuests'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useCabins } from '../cabins/useCabins'
 import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import DropDownList from '../../ui/Dropdown/DropdownList'
@@ -30,23 +30,28 @@ export default function CreateBookingForm({ onClose }) {
     } = useForm()
     const { errors } = formState
 
+    const [daysDifference, setDaysDifference] = useState(0)
+
     const { isLoading: isLoadingGuests, guests } = useGuests()
     const { isLoading: isLoadingCabins, cabins } = useCabins()
 
     const { isLoading: isLoadingSettings, settings = {} } = useSettings()
-    // console.log('settings = ', settings)
+    const { breakfastPrice, minBookingLength, maxBookingLength } = settings
+
+    // Стоимость завтраков за все дни
+    const breakfastAmmount = formatCurrency(breakfastPrice * daysDifference)
 
     //-------------------------------------------------
     // Слежение за датами
-    const startDate = watch('startDate')
-    const endDate = watch('endDate')
+    function handleDateChange() {
+        const startDateValue = getValues('startDate')
+        const endDateValue = getValues('endDate')
 
-    // Вычисление разницы в днях, когда изменяются startDate или endDate
-    const daysDifference =
-        startDate && endDate ? subtractDates(endDate, startDate) : 0
-
-    const { breakfastPrice, minBookingLength, maxBookingLength } = settings
-    const breakfastAmmount = formatCurrency(breakfastPrice * daysDifference)
+        if (startDateValue && endDateValue) {
+            const daysDiff = subtractDates(endDateValue, startDateValue)
+            setDaysDifference(daysDiff)
+        } else setDaysDifference(0)
+    }
     //-------------------------------------------------
 
     const {
@@ -109,17 +114,20 @@ export default function CreateBookingForm({ onClose }) {
                 {listId === 'guest' && (
                     <DropDownList>
                         <DropDownList.List position={position}>
-                            {filtered.map((guest) => (
-                                <DropDownList.Item
-                                    key={guest.id}
-                                    onClick={() => {
-                                        setValue('guest', guest.fullName)
-                                        closeDropdown()
-                                    }}
-                                >
-                                    {guest.fullName}
-                                </DropDownList.Item>
-                            ))}
+                            {filtered.map((guest) => {
+                                // console.log('guest', guest)
+                                return (
+                                    <DropDownList.Item
+                                        key={guest.id}
+                                        onClick={() => {
+                                            setValue('guest', guest.fullName)
+                                            closeDropdown()
+                                        }}
+                                    >
+                                        {guest.fullName}
+                                    </DropDownList.Item>
+                                )
+                            })}
                         </DropDownList.List>
                     </DropDownList>
                 )}
@@ -185,15 +193,13 @@ export default function CreateBookingForm({ onClose }) {
                                 const currentDate = new Date()
                                 const startDateValue = new Date(startDate)
 
-                                console.log('currentDate = ', currentDate)
-                                console.log('startDateValue = ', startDateValue)
-
                                 return (
                                     isAfter(startDateValue, currentDate) ||
                                     isSameDay(startDateValue, currentDate) ||
                                     'Start date must be after current date'
                                 )
                             },
+                            onChange: () => handleDateChange(),
                         })}
                     />
                 </FormRow>
@@ -211,35 +217,21 @@ export default function CreateBookingForm({ onClose }) {
                         {...register('endDate', {
                             required: 'This field is required',
                             validate: (endDate) => {
-                                // End date must be after start date
-                                const startDateValue = new Date(
-                                    getValues('startDate'),
-                                )
-                                const endDateValue = new Date(endDate)
-
-                                // const daysDifference =
-                                //     startDateValue && endDateValue
-                                //         ? subtractDates(
-                                //               endDateValue,
-                                //               startDateValue,
-                                //           )
-                                //         : 0
-
-                                const daysDifference = differenceInDays(
+                                const startDateValue = getValues('startDate')
+                                const endDateValue = endDate
+                                const daysDifference = subtractDates(
                                     endDateValue,
                                     startDateValue,
                                 )
 
-                                console.log('startDateValue', startDateValue)
-                                console.log('endDateValue', endDateValue)
-                                console.log('daysDifference', daysDifference)
-
-                                if (isAfter(startDateValue, endDateValue))
+                                // End date must be after start date
+                                if (daysDifference < 0)
                                     return 'End date must be after start date'
 
                                 // Booking must be more minBookingLength
                                 if (daysDifference < minBookingLength)
                                     return `Booking must be more ${minBookingLength}`
+
                                 // Booking must be less maxBookingLength
                                 if (daysDifference > maxBookingLength)
                                     return `Booking must be less ${maxBookingLength}`
@@ -247,6 +239,7 @@ export default function CreateBookingForm({ onClose }) {
                                 // Если всё в порядке, возвращаем true
                                 return true
                             },
+                            onChange: () => handleDateChange(),
                         })}
                     />
                 </FormRow>
