@@ -52,16 +52,12 @@ function List({ children, position }) {
     return <SearchList position={position}>{children}</SearchList>
 }
 
-function Item({ children, key, onClick }) {
+function Item({ children, onClick }) {
     function handleClick(event) {
         onClick(event.target.textContent)
         event.stopPropagation()
     }
-    return (
-        <SearchListItem key={key} onClick={handleClick}>
-            {children}
-        </SearchListItem>
-    )
+    return <SearchListItem onClick={handleClick}>{children}</SearchListItem>
 }
 
 DropDownList.List = List
