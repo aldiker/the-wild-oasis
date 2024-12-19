@@ -14,7 +14,7 @@ import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import DropDownList from '../../ui/Dropdown/DropdownList'
 
 import 'react-datepicker/dist/react-datepicker.css'
-import { add, format, isAfter, isSameDay } from 'date-fns'
+import { isAfter, isSameDay } from 'date-fns'
 import { formatCurrency, getToday, subtractDates } from '../../utils/helpers'
 import { useSettings } from '../settings/useSettings'
 
@@ -27,7 +27,12 @@ export default function CreateBookingForm({ onClose }) {
         formState,
         setValue,
         // watch,
-    } = useForm()
+    } = useForm({
+        defaultValues: {
+            startDate: getToday().split('T')[0],
+            numGuests: 8,
+        },
+    })
     const { errors } = formState
 
     const { isLoading: isLoadingSettings, settings = {} } = useSettings()
@@ -36,12 +41,22 @@ export default function CreateBookingForm({ onClose }) {
 
     const [numNights, setNumNights] = useState(0)
     const [cabinPrice, setСabinPrice] = useState(0)
-    const [cabinRegularPrice, setCabinRegularPrice] = useState(0)
-    const [cabinMaxCapacity, setCabinMaxCapacity] = useState(0)
-    const [cabinDiscount, setCabinDiscount] = useState(0)
     const [extrasPrice, setExtrasPrice] = useState(0)
+    const [selectedGuest, setSelectedGuest] = useState({})
+    const [selectedCabin, setSelectedCabin] = useState({})
 
-    // console.log('extrasPrice = ', extrasPrice)
+    // console.log('selectedGuest = ', selectedGuest)
+    // console.log('selectedCabin = ', selectedCabin)
+
+    const { regularPrice, maxCapacity, discount } = selectedCabin || {}
+    // console.log(
+    //     'regularPrice = ',
+    //     regularPrice, // стоимость номера
+    //     '|| maxCapacity = ',
+    //     maxCapacity, // вместительность номера
+    //     '|| discount = ',
+    //     discount, // скидка %
+    // )
 
     const totalPrice = cabinPrice + extrasPrice
 
@@ -63,25 +78,25 @@ export default function CreateBookingForm({ onClose }) {
     const tempExtrasPrice = breakfastPrice * numNights
     //-------------------------------------------------
     // Слежение за выбором номера
-    function handleCabinChange() {
-        const cabinValue = getValues('cabin')
-        const selectedCabin = cabins.find((cabin) => cabin.name === cabinValue)
-        // console.log('selectedCabin = ', selectedCabin)
+    // function handleCabinChange() {
+    //     const cabinValue = getValues('cabin')
+    //     const selectedCabin = cabins.find((cabin) => cabin.name === cabinValue)
+    // console.log('selectedCabin = ', selectedCabin)
 
-        const { regularPrice, maxCapacity, discount } = selectedCabin || {}
-        // console.log(
-        //     'regularPrice = ',
-        //     regularPrice, // стоимость номера
-        //     '|| maxCapacity = ',
-        //     maxCapacity, // вместительность номера
-        //     '|| discount = ',
-        //     discount, // скидка %
-        // )
+    // const { regularPrice, maxCapacity, discount } = selectedCabin || {}
+    // console.log(
+    //     'regularPrice = ',
+    //     regularPrice, // стоимость номера
+    //     '|| maxCapacity = ',
+    //     maxCapacity, // вместительность номера
+    //     '|| discount = ',
+    //     discount, // скидка %
+    // )
 
-        setCabinRegularPrice(regularPrice)
-        setCabinMaxCapacity(maxCapacity)
-        setCabinDiscount(discount)
-    }
+    // setCabinRegularPrice(regularPrice)
+    // setCabinMaxCapacity(maxCapacity)
+    // setCabinDiscount(discount)
+    // }
     //-------------------------------------------------
     // Слежение за датами
     function handleDateChange() {
@@ -103,8 +118,8 @@ export default function CreateBookingForm({ onClose }) {
     //-------------------------------------------------
 
     useEffect(() => {
-        setСabinPrice((cabinRegularPrice - cabinDiscount) * numNights)
-    }, [cabinRegularPrice, numNights, cabinDiscount])
+        setСabinPrice((regularPrice - discount) * numNights)
+    }, [regularPrice, numNights, discount])
 
     const {
         filtered,
@@ -121,7 +136,25 @@ export default function CreateBookingForm({ onClose }) {
     const isWorking = isLoadingGuests || isLoadingCabins || isLoadingSettings
 
     function handleSubmitForm(data) {
-        console.log(data)
+        console.log('data:', data)
+
+        const booking = {
+            startDate: getValues('startDate'),
+            endDate: getValues('endDate'),
+            numNights,
+            numGuests: getValues('numGuests'),
+            cabinPrice,
+            extrasPrice,
+            totalPrice,
+            status: 'unconfirmed',
+            hasBreakfast: false,
+            isPaid: false,
+            observations: '',
+            cabinId: '',
+            guestId: '',
+        }
+
+        console.log('booking:', booking)
     }
 
     function handleErrorForm(errors) {
@@ -173,6 +206,7 @@ export default function CreateBookingForm({ onClose }) {
                                         key={guest.id}
                                         onClick={() => {
                                             setValue('guest', guest.fullName)
+                                            setSelectedGuest(guest)
                                             closeDropdown()
                                         }}
                                     >
@@ -203,7 +237,7 @@ export default function CreateBookingForm({ onClose }) {
                                     inputCabinRef,
                                     'cabin',
                                 )
-                                handleCabinChange()
+                                // handleCabinChange()
                             },
                         })}
                         ref={(e) => {
@@ -220,7 +254,9 @@ export default function CreateBookingForm({ onClose }) {
                                     key={cabin.id}
                                     onClick={() => {
                                         setValue('cabin', cabin.name)
-                                        handleCabinChange()
+                                        // handleCabinChange()
+                                        setSelectedCabin(cabin)
+
                                         closeDropdown()
                                     }}
                                 >
@@ -240,7 +276,7 @@ export default function CreateBookingForm({ onClose }) {
                         type="date"
                         id="startDate"
                         disabled={isWorking}
-                        defaultValue={getToday().split('T')[0]}
+                        // defaultValue={getToday().split('T')[0]}
                         {...register('startDate', {
                             required: 'This field is required',
                             validate: (startDate) => {
@@ -311,7 +347,7 @@ export default function CreateBookingForm({ onClose }) {
                         type="number"
                         id="numGuests"
                         disabled={isWorking}
-                        defaultValue={1}
+                        // defaultValue={1}
                         {...register('numGuests', {
                             required: 'This field is required',
                             min: {
@@ -319,8 +355,8 @@ export default function CreateBookingForm({ onClose }) {
                                 message: 'Guests should not be less 1',
                             },
                             max: {
-                                value: cabinMaxCapacity,
-                                message: `Guests should not be more ${cabinMaxCapacity}`,
+                                value: maxCapacity,
+                                message: `Guests should not be more ${maxCapacity}`,
                             },
                         })}
                     />
