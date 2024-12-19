@@ -18,6 +18,7 @@ import { isAfter, isSameDay } from 'date-fns'
 import { formatCurrency, getToday, subtractDates } from '../../utils/helpers'
 import { useSettings } from '../settings/useSettings'
 import Textarea from '../../ui/Textarea'
+import { useCreateBookings } from './useCreateBooking'
 
 export default function CreateBookingForm({ onClose }) {
     const {
@@ -58,6 +59,8 @@ export default function CreateBookingForm({ onClose }) {
     // Полная стоимость бронирования
     const totalPrice = cabinPrice + extrasPrice
 
+    const { isCreating, createBooking } = useCreateBookings()
+
     // Слежение за датами
     function handleDateChange() {
         const startDateValue = getValues('startDate')
@@ -93,28 +96,30 @@ export default function CreateBookingForm({ onClose }) {
     const inputGuestRef = useRef(null)
     const inputCabinRef = useRef(null)
 
-    const isWorking = isLoadingGuests || isLoadingCabins || isLoadingSettings
+    const isWorking =
+        isLoadingGuests || isLoadingCabins || isLoadingSettings || isCreating
 
     function handleSubmitForm(data) {
-        console.log('data:', data)
-
         const booking = {
-            startDate: `${getValues('startDate')}T00:00:00Z`,
-            endDate: `${getValues('endDate')}T59:59:59Z`,
+            startDate: `${data.startDate}T00:00:00Z`,
+            endDate: `${data.endDate}T23:59:59Z`,
             numNights,
-            numGuests: +getValues('numGuests'),
+            numGuests: +data.numGuests,
             cabinPrice,
             extrasPrice,
             totalPrice,
             status: 'unconfirmed',
-            hasBreakfast: getValues('hasBreakfast'),
-            isPaid: getValues('isPaid'),
-            observations: getValues('observations'),
+            hasBreakfast: data.hasBreakfast,
+            isPaid: data.isPaid,
+            observations: data.observations,
             cabinId: selectedCabin.id,
             guestId: selectedGuest.id,
         }
 
         console.log('booking:', booking)
+
+        createBooking(booking)
+        onClose?.()
     }
 
     function handleErrorForm(errors) {

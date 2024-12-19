@@ -136,3 +136,16 @@ export async function deleteBooking(id) {
     }
     return data
 }
+
+export async function createBooking(newBooking) {
+    const query = supabase.from('bookings').insert([{ ...newBooking }])
+
+    const { data, error } = await query.select()
+
+    if (error) {
+        console.log(error)
+        throw new Error('Bookings could not be inserted!')
+    }
+
+    return data
+}
