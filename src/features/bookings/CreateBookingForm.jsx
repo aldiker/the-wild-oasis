@@ -30,6 +30,10 @@ export default function CreateBookingForm({ onClose }) {
     } = useForm()
     const { errors } = formState
 
+    const { isLoading: isLoadingSettings, settings = {} } = useSettings()
+    const { breakfastPrice, minBookingLength, maxBookingLength } =
+        settings || {}
+
     const [numNights, setNumNights] = useState(0)
     const [cabinPrice, setСabinPrice] = useState(0)
     const [cabinRegularPrice, setCabinRegularPrice] = useState(0)
@@ -37,14 +41,26 @@ export default function CreateBookingForm({ onClose }) {
     const [cabinDiscount, setCabinDiscount] = useState(0)
     const [extrasPrice, setExtrasPrice] = useState(0)
 
+    // console.log('extrasPrice = ', extrasPrice)
+
+    const totalPrice = cabinPrice + extrasPrice
+
     const { isLoading: isLoadingGuests, guests } = useGuests()
     const { isLoading: isLoadingCabins, cabins } = useCabins()
 
-    const { isLoading: isLoadingSettings, settings = {} } = useSettings()
-    const { breakfastPrice, minBookingLength, maxBookingLength } = settings
+    // console.log(
+    //     'breakfastPrice = ',
+    //     breakfastPrice,
+    //     '|| minBookingLength = ',
+    //     minBookingLength,
+    //     '|| maxBookingLength',
+    //     maxBookingLength,
+    // )
+
+    // console.log('cabinPrice = ', cabinPrice)
 
     // Стоимость завтраков за все дни
-    const tempExtrasPrice = formatCurrency(breakfastPrice * numNights)
+    const tempExtrasPrice = breakfastPrice * numNights
     //-------------------------------------------------
     // Слежение за выбором номера
     function handleCabinChange() {
@@ -53,14 +69,14 @@ export default function CreateBookingForm({ onClose }) {
         // console.log('selectedCabin = ', selectedCabin)
 
         const { regularPrice, maxCapacity, discount } = selectedCabin || {}
-        console.log(
-            'regularPrice = ',
-            regularPrice, // стоимость номера
-            '|| maxCapacity = ',
-            maxCapacity, // вместительность номера
-            '|| discount = ',
-            discount, // скидка %
-        )
+        // console.log(
+        //     'regularPrice = ',
+        //     regularPrice, // стоимость номера
+        //     '|| maxCapacity = ',
+        //     maxCapacity, // вместительность номера
+        //     '|| discount = ',
+        //     discount, // скидка %
+        // )
 
         setCabinRegularPrice(regularPrice)
         setCabinMaxCapacity(maxCapacity)
@@ -72,6 +88,13 @@ export default function CreateBookingForm({ onClose }) {
         const startDateValue = getValues('startDate')
         const endDateValue = getValues('endDate')
 
+        console.log(
+            'startDateValue = ',
+            startDateValue,
+            '|| endDateValue = ',
+            endDateValue,
+        )
+
         if (startDateValue && endDateValue) {
             const daysDiff = subtractDates(endDateValue, startDateValue)
             setNumNights(daysDiff)
@@ -80,9 +103,7 @@ export default function CreateBookingForm({ onClose }) {
     //-------------------------------------------------
 
     useEffect(() => {
-        setСabinPrice(
-            formatCurrency((cabinRegularPrice - cabinDiscount) * numNights),
-        )
+        setСabinPrice((cabinRegularPrice - cabinDiscount) * numNights)
     }, [cabinRegularPrice, numNights, cabinDiscount])
 
     const {
@@ -124,7 +145,6 @@ export default function CreateBookingForm({ onClose }) {
                         type="text"
                         id="guest"
                         disabled={isWorking}
-                        // defaultValue={editValues?.name}
                         {...register('guest', {
                             required: 'This field is required',
                             onChange: () => {
@@ -173,7 +193,6 @@ export default function CreateBookingForm({ onClose }) {
                         type="text"
                         id="cabin"
                         disabled={isWorking}
-                        // defaultValue={editValues?.name}
                         {...register('cabin', {
                             required: 'This field is required',
                             onChange: () => {
@@ -234,6 +253,7 @@ export default function CreateBookingForm({ onClose }) {
                                     'Start date must be after current date'
                                 )
                             },
+                            // defaultValue: getToday().split('T')[0],
                             onChange: () => handleDateChange(),
                         })}
                     />
@@ -248,10 +268,10 @@ export default function CreateBookingForm({ onClose }) {
                         type="date"
                         id="endDate"
                         disabled={isWorking}
-                        defaultValue={format(
-                            add(new Date(), { days: minBookingLength }),
-                            'yyyy-MM-dd',
-                        )}
+                        // defaultValue={format(
+                        //     add(new Date(), { days: minBookingLength }),
+                        //     'yyyy-MM-dd',
+                        // )}
                         {...register('endDate', {
                             required: 'This field is required',
                             validate: (endDate) => {
@@ -290,7 +310,7 @@ export default function CreateBookingForm({ onClose }) {
                     <Input
                         type="number"
                         id="numGuests"
-                        // disabled={isWorking}
+                        disabled={isWorking}
                         defaultValue={1}
                         {...register('numGuests', {
                             required: 'This field is required',
@@ -314,12 +334,22 @@ export default function CreateBookingForm({ onClose }) {
                     <Input
                         type="checkbox"
                         id="hasBreakfast"
-                        // disabled={isWorking}
-                        // defaultValue={editValues?.name}
-                        {...register('hasBreakfast', {})}
+                        disabled={isWorking}
+                        // defaultValue={false}
+                        {...register('hasBreakfast', {
+                            onChange: (e) => {
+                                setValue('isPaid', false)
+                                // console.log(e.target.checked)
+
+                                e.target.checked
+                                    ? setExtrasPrice(tempExtrasPrice)
+                                    : setExtrasPrice(0)
+                            },
+                        })}
                     />
                     <span>
-                        For {numNights} days is {tempExtrasPrice}
+                        For {numNights} days is{' '}
+                        {formatCurrency(tempExtrasPrice)}
                     </span>
                 </FormRow>
 
@@ -330,12 +360,16 @@ export default function CreateBookingForm({ onClose }) {
                     <Input
                         type="checkbox"
                         id="isPaid"
-                        // disabled={isWorking}
-                        // defaultValue={editValues?.name}
+                        disabled={isWorking || cabinPrice === 0}
+                        // defaultValue={false}
                         {...register('isPaid', {})}
                     />
                     <span>
-                        For {numNights} days is {cabinPrice}
+                        For {numNights} days is{' '}
+                        {formatCurrency(cabinPrice || 0)}{' '}
+                        {extrasPrice > 0
+                            ? `+ ${formatCurrency(extrasPrice)} = ${formatCurrency(totalPrice)}`
+                            : ''}
                     </span>
                 </FormRow>
 
