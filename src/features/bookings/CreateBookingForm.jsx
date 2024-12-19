@@ -17,6 +17,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { isAfter, isSameDay } from 'date-fns'
 import { formatCurrency, getToday, subtractDates } from '../../utils/helpers'
 import { useSettings } from '../settings/useSettings'
+import Textarea from '../../ui/Textarea'
 
 export default function CreateBookingForm({ onClose }) {
     const {
@@ -30,7 +31,9 @@ export default function CreateBookingForm({ onClose }) {
     } = useForm({
         defaultValues: {
             startDate: getToday().split('T')[0],
-            numGuests: 8,
+            numGuests: 1,
+            hasBreakfast: false,
+            isPaid: false,
         },
     })
     const { errors } = formState
@@ -45,59 +48,16 @@ export default function CreateBookingForm({ onClose }) {
     const [selectedGuest, setSelectedGuest] = useState({})
     const [selectedCabin, setSelectedCabin] = useState({})
 
-    // console.log('selectedGuest = ', selectedGuest)
-    // console.log('selectedCabin = ', selectedCabin)
-
     const { regularPrice, maxCapacity, discount } = selectedCabin || {}
-    // console.log(
-    //     'regularPrice = ',
-    //     regularPrice, // стоимость номера
-    //     '|| maxCapacity = ',
-    //     maxCapacity, // вместительность номера
-    //     '|| discount = ',
-    //     discount, // скидка %
-    // )
-
-    const totalPrice = cabinPrice + extrasPrice
 
     const { isLoading: isLoadingGuests, guests } = useGuests()
     const { isLoading: isLoadingCabins, cabins } = useCabins()
 
-    // console.log(
-    //     'breakfastPrice = ',
-    //     breakfastPrice,
-    //     '|| minBookingLength = ',
-    //     minBookingLength,
-    //     '|| maxBookingLength',
-    //     maxBookingLength,
-    // )
-
-    // console.log('cabinPrice = ', cabinPrice)
-
     // Стоимость завтраков за все дни
     const tempExtrasPrice = breakfastPrice * numNights
-    //-------------------------------------------------
-    // Слежение за выбором номера
-    // function handleCabinChange() {
-    //     const cabinValue = getValues('cabin')
-    //     const selectedCabin = cabins.find((cabin) => cabin.name === cabinValue)
-    // console.log('selectedCabin = ', selectedCabin)
+    // Полная стоимость бронирования
+    const totalPrice = cabinPrice + extrasPrice
 
-    // const { regularPrice, maxCapacity, discount } = selectedCabin || {}
-    // console.log(
-    //     'regularPrice = ',
-    //     regularPrice, // стоимость номера
-    //     '|| maxCapacity = ',
-    //     maxCapacity, // вместительность номера
-    //     '|| discount = ',
-    //     discount, // скидка %
-    // )
-
-    // setCabinRegularPrice(regularPrice)
-    // setCabinMaxCapacity(maxCapacity)
-    // setCabinDiscount(discount)
-    // }
-    //-------------------------------------------------
     // Слежение за датами
     function handleDateChange() {
         const startDateValue = getValues('startDate')
@@ -139,19 +99,19 @@ export default function CreateBookingForm({ onClose }) {
         console.log('data:', data)
 
         const booking = {
-            startDate: getValues('startDate'),
-            endDate: getValues('endDate'),
+            startDate: `${getValues('startDate')}T00:00:00Z`,
+            endDate: `${getValues('endDate')}T59:59:59Z`,
             numNights,
-            numGuests: getValues('numGuests'),
+            numGuests: +getValues('numGuests'),
             cabinPrice,
             extrasPrice,
             totalPrice,
             status: 'unconfirmed',
-            hasBreakfast: false,
-            isPaid: false,
-            observations: '',
-            cabinId: '',
-            guestId: '',
+            hasBreakfast: getValues('hasBreakfast'),
+            isPaid: getValues('isPaid'),
+            observations: getValues('observations'),
+            cabinId: selectedCabin.id,
+            guestId: selectedGuest.id,
         }
 
         console.log('booking:', booking)
@@ -358,6 +318,19 @@ export default function CreateBookingForm({ onClose }) {
                                 value: maxCapacity,
                                 message: `Guests should not be more ${maxCapacity}`,
                             },
+                        })}
+                    />
+                </FormRow>
+
+                <FormRow
+                    label="Some observations:"
+                    error={errors?.observations?.message}
+                >
+                    <Textarea
+                        id="observations"
+                        disabled={isWorking}
+                        {...register('observations', {
+                            required: 'This field is required',
                         })}
                     />
                 </FormRow>
