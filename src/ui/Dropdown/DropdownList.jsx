@@ -54,7 +54,9 @@ function List({ children, position }) {
 
 function Item({ children, onClick }) {
     function handleClick(event) {
-        onClick(event.target.textContent)
+        // onClick(event.target.textContent)
+        // onClick(children)
+        onClick()
         event.stopPropagation()
     }
     return <SearchListItem onClick={handleClick}>{children}</SearchListItem>

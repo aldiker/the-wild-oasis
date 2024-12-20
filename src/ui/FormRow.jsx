@@ -28,7 +28,7 @@ const StyledFormRow = styled.div`
     }
 
     &:has(input[type='checkbox']) {
-        grid-template-columns: 24rem 2rem 1.5fr 1fr;
+        grid-template-columns: 24rem 2rem 1fr;
     }
 
     // Только для блока ошибки — выравнивание по правому краю

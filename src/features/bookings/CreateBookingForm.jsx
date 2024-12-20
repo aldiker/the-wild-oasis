@@ -28,7 +28,7 @@ export default function CreateBookingForm({ onClose }) {
         getValues,
         formState,
         setValue,
-        // watch,
+        watch,
     } = useForm({
         defaultValues: {
             startDate: getToday().split('T')[0],
@@ -39,23 +39,28 @@ export default function CreateBookingForm({ onClose }) {
     })
     const { errors } = formState
 
+    // Получаем настройки чтобы получить стоимость завтрака и минимальное и максимальное бронирование
     const { isLoading: isLoadingSettings, settings = {} } = useSettings()
     const { breakfastPrice, minBookingLength, maxBookingLength } =
         settings || {}
 
-    const [numNights, setNumNights] = useState(0)
-    const [cabinPrice, setСabinPrice] = useState(0)
-    const [extrasPrice, setExtrasPrice] = useState(0)
-    const [selectedGuest, setSelectedGuest] = useState({})
-    const [selectedCabin, setSelectedCabin] = useState({})
+    const [numNights, setNumNights] = useState(0) // количество ночей
+    const [cabinPrice, setСabinPrice] = useState(0) // стоимость проживания
+    const [extrasPrice, setExtrasPrice] = useState(0) // стоимость завтраков
+    const [selectedGuest, setSelectedGuest] = useState({}) // выбранный гость
+    const [selectedCabin, setSelectedCabin] = useState({}) // выбранный домик
 
+    // Из выбранного домика получаем его стоимость и максимальную вместимость
     const { regularPrice, maxCapacity, discount } = selectedCabin || {}
 
+    // получаем список гостей и домиков, для формирования выпадающего списка
     const { isLoading: isLoadingGuests, guests } = useGuests()
     const { isLoading: isLoadingCabins, cabins } = useCabins()
 
-    // Стоимость завтраков за все дни
-    const tempExtrasPrice = breakfastPrice * numNights
+    // Стоимость завтраков за все дни на всех гостей
+    const numGuestsValue = watch('numGuests')
+    const tempExtrasPrice = breakfastPrice * numNights * numGuestsValue
+
     // Полная стоимость бронирования
     const totalPrice = cabinPrice + extrasPrice
 
@@ -75,27 +80,31 @@ export default function CreateBookingForm({ onClose }) {
 
         if (startDateValue && endDateValue) {
             const daysDiff = subtractDates(endDateValue, startDateValue)
-            setNumNights(daysDiff)
+            setNumNights(daysDiff) // сохраняем разницу между датами
         } else setNumNights(0)
     }
     //-------------------------------------------------
 
+    // синхронизируем стоимость проживания - cabinPrice, с количеством ночей проживания - numNights
     useEffect(() => {
         setСabinPrice((regularPrice - discount) * numNights)
     }, [regularPrice, numNights, discount])
 
+    // Получаем объекты для формирования всплывающего списка
     const {
-        filtered,
-        listId,
-        position,
-        formRef,
-        handleInputChange,
-        closeDropdown,
+        filtered, // отфильрованный список
+        listId, // id списка, который будет отображаться
+        position, // координаты списка
+        formRef, // ссылка на объект формы, относительно которой будет формироваться позиция выпадающего списка
+        handleInputChange, // функция, которая будет выполняться при изменении значения поля ввода, возле которого нам необходим список
+        closeDropdown, // функция, которая будет закрывать выпадающий список
     } = useDropdown()
 
-    const inputGuestRef = useRef(null)
-    const inputCabinRef = useRef(null)
+    // Переменные для хранения полей ввода, возле которых будет всплывающий список
+    const inputGuestRef = useRef(null) // для поля ввода гостя
+    const inputCabinRef = useRef(null) // для поля ввода домика
 
+    // Работа с БД
     const isWorking =
         isLoadingGuests || isLoadingCabins || isLoadingSettings || isCreating
 
@@ -165,13 +174,17 @@ export default function CreateBookingForm({ onClose }) {
                     <DropDownList>
                         <DropDownList.List position={position}>
                             {filtered.map((guest) => {
-                                // console.log('guest', guest)
                                 return (
                                     <DropDownList.Item
                                         key={guest.id}
                                         onClick={() => {
+                                            // устанавливаем значение поля ввода формы "guest"
                                             setValue('guest', guest.fullName)
+
+                                            // запоминаем выбранного гостя в состояние
                                             setSelectedGuest(guest)
+
+                                            // закрываем выпадающий список
                                             closeDropdown()
                                         }}
                                     >
@@ -202,7 +215,6 @@ export default function CreateBookingForm({ onClose }) {
                                     inputCabinRef,
                                     'cabin',
                                 )
-                                // handleCabinChange()
                             },
                         })}
                         ref={(e) => {
@@ -219,7 +231,6 @@ export default function CreateBookingForm({ onClose }) {
                                     key={cabin.id}
                                     onClick={() => {
                                         setValue('cabin', cabin.name)
-                                        // handleCabinChange()
                                         setSelectedCabin(cabin)
 
                                         closeDropdown()
@@ -241,7 +252,6 @@ export default function CreateBookingForm({ onClose }) {
                         type="date"
                         id="startDate"
                         disabled={isWorking}
-                        // defaultValue={getToday().split('T')[0]}
                         {...register('startDate', {
                             required: 'This field is required',
                             validate: (startDate) => {
@@ -254,7 +264,6 @@ export default function CreateBookingForm({ onClose }) {
                                     'Start date must be after current date'
                                 )
                             },
-                            // defaultValue: getToday().split('T')[0],
                             onChange: () => handleDateChange(),
                         })}
                     />
@@ -269,10 +278,6 @@ export default function CreateBookingForm({ onClose }) {
                         type="date"
                         id="endDate"
                         disabled={isWorking}
-                        // defaultValue={format(
-                        //     add(new Date(), { days: minBookingLength }),
-                        //     'yyyy-MM-dd',
-                        // )}
                         {...register('endDate', {
                             required: 'This field is required',
                             validate: (endDate) => {
@@ -362,7 +367,7 @@ export default function CreateBookingForm({ onClose }) {
                         })}
                     />
                     <span>
-                        For {numNights} days is{' '}
+                        For {numNights} days for {numGuestsValue} guests is{' '}
                         {formatCurrency(tempExtrasPrice)}
                     </span>
                 </FormRow>
