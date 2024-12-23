@@ -2,6 +2,8 @@ import styled from 'styled-components'
 
 const SearchList = styled.ul`
     position: fixed;
+    max-height: 50rem;
+    overflow: scroll;
 
     background-color: var(--color-grey-0);
     box-shadow: var(--shadow-md);

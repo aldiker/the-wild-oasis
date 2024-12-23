@@ -1,5 +1,6 @@
 import Button from '../../ui/Button'
 import Modal from '../../ui/Modal'
+import CreateGuestForm from '../guests/CreateGuestForm'
 import CreateBookingForm from './CreateBookingForm'
 
 export default function AddBooking() {
@@ -11,6 +12,9 @@ export default function AddBooking() {
                 </Modal.Open>
                 <Modal.Window name="booking-form">
                     <CreateBookingForm />
+                </Modal.Window>
+                <Modal.Window name="guest-form">
+                    <CreateGuestForm />
                 </Modal.Window>
             </Modal>
         </div>

@@ -20,7 +20,7 @@ export function useDropdown() {
             newFiltered = list.filter((item) =>
                 item[displayField]
                     .toLowerCase()
-                    .includes(inputValue.toLowerCase()),
+                    .includes(inputValue.trim().toLowerCase()),
             )
         }
 

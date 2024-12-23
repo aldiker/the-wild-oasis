@@ -11,6 +11,17 @@ export async function getGuests() {
     return data
 }
 
+export async function getCountries() {
+    const { data, error } = await fetch('https://flagcdn.com/en/codes.json')
+
+    if (error) {
+        console.log(error)
+        throw new Error('Cabins could not be loaded!')
+    }
+
+    return data
+}
+
 // export async function getGuests({ filter, sortBy, page }) {
 //     let query = supabase
 //         .from('guests')

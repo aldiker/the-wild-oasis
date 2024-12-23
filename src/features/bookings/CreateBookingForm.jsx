@@ -19,6 +19,7 @@ import { formatCurrency, getToday, subtractDates } from '../../utils/helpers'
 import { useSettings } from '../settings/useSettings'
 import Textarea from '../../ui/Textarea'
 import { useCreateBookings } from './useCreateBooking'
+import Modal from '../../ui/Modal'
 
 export default function CreateBookingForm({ onClose }) {
     const {
@@ -393,7 +394,16 @@ export default function CreateBookingForm({ onClose }) {
                 </FormRow>
 
                 <FormRow>
-                    {/* <Button>Create new guest</Button> */}
+                    <Modal.Open opens="guest-form">
+                        <Button
+                            variation="secondary"
+                            disabled={isWorking}
+                            type="button"
+                            style={{ marginRight: 'auto' }}
+                        >
+                            Add new guest
+                        </Button>
+                    </Modal.Open>
 
                     <Button
                         variation="secondary"
