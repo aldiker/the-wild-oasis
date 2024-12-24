@@ -12,14 +12,28 @@ export async function getGuests() {
 }
 
 export async function getCountries() {
-    const { data, error } = await fetch('https://flagcdn.com/en/codes.json')
+    try {
+        const response = await fetch('https://flagcdn.com/en/codes.json')
+        if (!response.ok) {
+            console.log(response.status)
+            throw new Error('HTTP Error: ')
+        }
+        const data = await response.json()
+        const result = []
 
-    if (error) {
+        for (const key in data) {
+            result.push({
+                flag: `https://flagcdn.com/${key}.svg`,
+                country: data[key],
+            })
+        }
+        // console.log('result =', result)
+
+        return result
+    } catch (error) {
         console.log(error)
-        throw new Error('Cabins could not be loaded!')
+        throw new Error('Countries could not be loaded!')
     }
-
-    return data
 }
 
 // export async function getGuests({ filter, sortBy, page }) {

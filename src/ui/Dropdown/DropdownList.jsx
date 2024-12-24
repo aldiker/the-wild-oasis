@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 const SearchList = styled.ul`
     position: fixed;
-    max-height: 50rem;
+    max-height: 16.4rem; // for 5 items
     overflow: scroll;
 
     background-color: var(--color-grey-0);
