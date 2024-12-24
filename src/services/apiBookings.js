@@ -144,7 +144,7 @@ export async function createBooking(newBooking) {
 
     if (error) {
         console.log(error)
-        throw new Error('Bookings could not be inserted!')
+        throw new Error('Booking could not be inserted!')
     }
 
     return data

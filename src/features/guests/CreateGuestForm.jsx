@@ -6,27 +6,21 @@ import Button from '../../ui/Button'
 import FormRow from '../../ui/FormRow'
 import Heading from '../../ui/Heading'
 
-import { useSettings } from '../settings/useSettings'
 import { useCountries } from './useCountries'
-import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import { useRef, useState } from 'react'
+import { useCreateGuest } from './useCreateGuest'
+
+import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import DropDownList from '../../ui/Dropdown/DropdownList'
 
 export default function CreateGuestForm({ onClose }) {
     const [selectedNationality, setSelectedNationality] = useState(null)
     console.log('selectedNationality = ', selectedNationality)
 
-    const {
-        register,
-        handleSubmit,
-        reset,
-        getValues,
-        formState,
-        setValue,
-        watch,
-    } = useForm({
-        defaultValues: {},
-    })
+    const { register, handleSubmit, reset, getValues, formState, setValue } =
+        useForm({
+            defaultValues: {},
+        })
     const { errors } = formState
 
     const { isLoading: isLoadingCountries, countries } = useCountries()
@@ -44,12 +38,22 @@ export default function CreateGuestForm({ onClose }) {
     // Переменные для хранения полей ввода, возле которых будет всплывающий список
     const inputNationalityRef = useRef(null) // для поля ввода страны
 
+    const { isCreating: isCreatingGuest, create: createGuest } =
+        useCreateGuest()
+
     // Работа с БД
-    const isWorking = isLoadingCountries
+    const isWorking = isLoadingCountries || isCreatingGuest
 
     function handleSubmitForm(data) {
         console.log('Submiting ...')
-        console.log(data)
+
+        const newGuest = {
+            ...data,
+            countryFlag: selectedNationality?.flag,
+        }
+
+        console.log('newGuest', newGuest)
+        createGuest(newGuest)
 
         // onClose?.()
     }

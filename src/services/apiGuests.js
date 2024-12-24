@@ -1,3 +1,4 @@
+import { longFormatters } from 'date-fns'
 import supabase from './supabase'
 
 export async function getGuests() {
@@ -19,21 +20,37 @@ export async function getCountries() {
             throw new Error('HTTP Error: ')
         }
         const data = await response.json()
-        const result = []
 
-        for (const key in data) {
-            result.push({
-                flag: `https://flagcdn.com/${key}.svg`,
-                country: data[key],
-            })
-        }
-        // console.log('result =', result)
+        const result = Object.entries(data).map(([flag, country]) => {
+            return { flag: `https://flagcdn.com/${flag}.svg`, country: country }
+        })
+
+        // const result = []
+        // for (const key in data) {
+        //     result.push({
+        //         flag: `https://flagcdn.com/${key}.svg`,
+        //         country: data[key],
+        //     })
+        // }
 
         return result
     } catch (error) {
         console.log(error)
         throw new Error('Countries could not be loaded!')
     }
+}
+
+export async function createGuest(newGuest) {
+    const query = supabase.from('guests').insert([{ ...newGuest }])
+
+    const { data, error } = await query.select()
+
+    if (error) {
+        console.log(error)
+        throw new Error('Guest could not be inserted!')
+    }
+
+    return data
 }
 
 // export async function getGuests({ filter, sortBy, page }) {
