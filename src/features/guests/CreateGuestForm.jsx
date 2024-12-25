@@ -53,9 +53,16 @@ export default function CreateGuestForm({ onClose }) {
         }
 
         console.log('newGuest', newGuest)
-        createGuest(newGuest)
-
-        // onClose?.()
+        createGuest(newGuest, {
+            onSuccess: () => {
+                console.log('Success!!!')
+                reset()
+                onClose?.()
+            },
+            onError: (error) => {
+                console.log('Fault!!!', error.message)
+            },
+        })
     }
 
     function handleErrorForm(errors) {
