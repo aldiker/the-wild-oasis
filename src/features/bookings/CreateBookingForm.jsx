@@ -1,27 +1,30 @@
+import 'react-datepicker/dist/react-datepicker.css'
+import { useEffect, useRef, useState } from 'react'
+import { isAfter, isSameDay } from 'date-fns'
 import { useForm } from 'react-hook-form'
 
 import Input from '../../ui/Input'
 import Form from '../../ui/Form'
 import Button from '../../ui/Button'
-// import FileInput from '../../ui/FileInput'
-// import Textarea from '../../ui/Textarea'
 import FormRow from '../../ui/FormRow'
 import Heading from '../../ui/Heading'
+import Textarea from '../../ui/Textarea'
+import Modal from '../../ui/Modal'
+
 import { useGuests } from '../guests/useGuests'
-import { useEffect, useRef, useState } from 'react'
 import { useCabins } from '../cabins/useCabins'
+import { useSettings } from '../settings/useSettings'
+import { useCreateBookings } from './useCreateBooking'
+
 import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import DropDownList from '../../ui/Dropdown/DropdownList'
 
-import 'react-datepicker/dist/react-datepicker.css'
-import { isAfter, isSameDay } from 'date-fns'
 import { formatCurrency, getToday, subtractDates } from '../../utils/helpers'
-import { useSettings } from '../settings/useSettings'
-import Textarea from '../../ui/Textarea'
-import { useCreateBookings } from './useCreateBooking'
-import Modal from '../../ui/Modal'
 
-export default function CreateBookingForm({ onClose }) {
+export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
+    // const CreateBookingForm = React.memo(({ onClose, newGuest, setNewGuest }) => {
+    console.log('CreateBookingForm:newGuest = ', newGuest)
+
     const {
         register,
         handleSubmit,
@@ -32,6 +35,7 @@ export default function CreateBookingForm({ onClose }) {
         watch,
     } = useForm({
         defaultValues: {
+            guest: newGuest ? newGuest.fullName : '',
             startDate: getToday().split('T')[0],
             numGuests: 1,
             hasBreakfast: false,
@@ -88,8 +92,14 @@ export default function CreateBookingForm({ onClose }) {
 
     // синхронизируем стоимость проживания - cabinPrice, с количеством ночей проживания - numNights
     useEffect(() => {
+        // console.log('CreateBookingForm - Mounting ...')
         setСabinPrice((regularPrice - discount) * numNights)
-    }, [regularPrice, numNights, discount])
+
+        return () => {
+            setNewGuest(null)
+            // console.log('CreateBookingForm - Unmounting ...')
+        }
+    }, [regularPrice, numNights, discount, setNewGuest])
 
     // Получаем объекты для формирования всплывающего списка
     const {
@@ -422,3 +432,5 @@ export default function CreateBookingForm({ onClose }) {
         </div>
     )
 }
+
+// CreateBookingForm.displayName = 'CreateBookingForm'

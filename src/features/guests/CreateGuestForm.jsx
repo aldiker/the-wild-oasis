@@ -12,8 +12,10 @@ import { useCreateGuest } from './useCreateGuest'
 
 import { useDropdown } from '../../ui/Dropdown/useDropdown'
 import DropDownList from '../../ui/Dropdown/DropdownList'
+import Modal from '../../ui/Modal'
 
-export default function CreateGuestForm({ onClose }) {
+export default function CreateGuestForm({ onClose, setNewGuest }) {
+    // export default function CreateGuestForm({ onClose }) {
     const [selectedNationality, setSelectedNationality] = useState(null)
     console.log('selectedNationality = ', selectedNationality)
 
@@ -41,6 +43,8 @@ export default function CreateGuestForm({ onClose }) {
     const { isCreating: isCreatingGuest, create: createGuest } =
         useCreateGuest()
 
+    const openModal = Modal.useOpen()
+
     // Работа с БД
     const isWorking = isLoadingCountries || isCreatingGuest
 
@@ -51,13 +55,14 @@ export default function CreateGuestForm({ onClose }) {
             ...data,
             countryFlag: selectedNationality?.flag,
         }
+        // console.log('newGuest', newGuest)
 
-        console.log('newGuest', newGuest)
         createGuest(newGuest, {
             onSuccess: () => {
                 console.log('Success!!!')
                 reset()
-                onClose?.()
+                setNewGuest(newGuest)
+                openModal('booking-form')
             },
             onError: (error) => {
                 console.log('Fault!!!', error.message)
