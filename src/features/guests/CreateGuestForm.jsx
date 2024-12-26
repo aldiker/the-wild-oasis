@@ -7,7 +7,7 @@ import FormRow from '../../ui/FormRow'
 import Heading from '../../ui/Heading'
 
 import { useCountries } from './useCountries'
-import { useRef, useState } from 'react'
+import { act, useRef, useState } from 'react'
 import { useCreateGuest } from './useCreateGuest'
 
 import { useDropdown } from '../../ui/Dropdown/useDropdown'
@@ -17,7 +17,7 @@ import Modal from '../../ui/Modal'
 export default function CreateGuestForm({ onClose, setNewGuest }) {
     // export default function CreateGuestForm({ onClose }) {
     const [selectedNationality, setSelectedNationality] = useState(null)
-    console.log('selectedNationality = ', selectedNationality)
+    // console.log('selectedNationality = ', selectedNationality)
 
     const { register, handleSubmit, reset, getValues, formState, setValue } =
         useForm({
@@ -48,21 +48,24 @@ export default function CreateGuestForm({ onClose, setNewGuest }) {
     // Работа с БД
     const isWorking = isLoadingCountries || isCreatingGuest
 
-    function handleSubmitForm(data) {
+    function handleSubmitForm(data, event) {
         console.log('Submiting ...')
+
+        // Получаем значение value кнопки, которую нажали
+        const action = event.nativeEvent.submitter.value
+        console.log('Action = ', action)
 
         const newGuest = {
             ...data,
             countryFlag: selectedNationality?.flag,
         }
-        // console.log('newGuest', newGuest)
 
         createGuest(newGuest, {
             onSuccess: () => {
                 console.log('Success!!!')
                 reset()
                 setNewGuest(newGuest)
-                openModal('booking-form')
+                if (action === 'create-and-book') openModal('booking-form')
             },
             onError: (error) => {
                 console.log('Fault!!!', error.message)
@@ -194,7 +197,12 @@ export default function CreateGuestForm({ onClose, setNewGuest }) {
                     >
                         Cancel
                     </Button>
-                    <Button disabled={isWorking}>Create new guest</Button>
+                    <Button disabled={isWorking} value="create-only">
+                        Create new guest only
+                    </Button>
+                    <Button disabled={isWorking} value="create-and-book">
+                        Create new guest and go to booking
+                    </Button>
                 </FormRow>
             </Form>
         </div>

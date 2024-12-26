@@ -8,13 +8,6 @@ export default function AddBooking() {
     const [newGuest, setNewGuest] = useState(null)
     console.log('AddBooking:newGuest = ', newGuest)
 
-    // useEffect(() => {
-    //     console.log('AddBooking - Mounting ...')
-    //     return () => {
-    //         console.log('AddBooking - Unmounting ...')
-    //     }
-    // }, [])
-
     return (
         <div>
             <Modal>

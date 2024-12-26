@@ -85,7 +85,8 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
 
         if (startDateValue && endDateValue) {
             const daysDiff = subtractDates(endDateValue, startDateValue)
-            setNumNights(daysDiff) // сохраняем разницу между датами
+            // сохраняем разницу между датами
+            daysDiff > 0 ? setNumNights(daysDiff) : setNumNights(0)
         } else setNumNights(0)
     }
     //-------------------------------------------------
@@ -338,6 +339,10 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
                             max: {
                                 value: maxCapacity,
                                 message: `Guests should not be more ${maxCapacity}`,
+                            },
+                            onChange: (e) => {
+                                const value = e.target.value
+                                if (value < 1) setValue('numGuests', 1)
                             },
                         })}
                     />
