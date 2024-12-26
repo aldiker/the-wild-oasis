@@ -32,8 +32,11 @@ export default function TodayItem({ activity }) {
             {status === 'unconfirmed' && <Tag type="green">Ariving</Tag>}
             {status === 'checked-in' && <Tag type="blue">Departing</Tag>}
 
-            <Flag src={guests.countryFlag} alt={`Flag of ${guests.country}`} />
-            <Guest>{guests.fullName}</Guest>
+            <Flag
+                src={guests?.countryFlag}
+                alt={`Flag of ${guests?.country}`}
+            />
+            <Guest>{guests?.fullName}</Guest>
             <div>{numNights} nights</div>
 
             {status === 'unconfirmed' && (
