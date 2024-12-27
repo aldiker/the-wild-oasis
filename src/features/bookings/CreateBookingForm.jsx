@@ -52,8 +52,11 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
     const [numNights, setNumNights] = useState(0) // количество ночей
     const [cabinPrice, setСabinPrice] = useState(0) // стоимость проживания
     const [extrasPrice, setExtrasPrice] = useState(0) // стоимость завтраков
-    const [selectedGuest, setSelectedGuest] = useState({}) // выбранный гость
-    const [selectedCabin, setSelectedCabin] = useState({}) // выбранный домик
+    const [selectedGuest, setSelectedGuest] = useState(null) // выбранный гость
+    const [selectedCabin, setSelectedCabin] = useState(null) // выбранный домик
+
+    console.log('selectedGuest = ', selectedGuest)
+    console.log('selectedCabin = ', selectedCabin)
 
     // Из выбранного домика получаем его стоимость и максимальную вместимость
     const { regularPrice, maxCapacity, discount } = selectedCabin || {}
@@ -98,6 +101,7 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
 
         return () => {
             setNewGuest(null)
+
             // console.log('CreateBookingForm - Unmounting ...')
         }
     }, [regularPrice, numNights, discount, setNewGuest])
@@ -121,6 +125,9 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
         isLoadingGuests || isLoadingCabins || isLoadingSettings || isCreating
 
     function handleSubmitForm(data) {
+        if (!selectedGuest) throw new Error("Guest isn't choosen")
+        if (!selectedCabin) throw new Error("Cabin isn't choosen")
+
         const booking = {
             startDate: `${data.startDate}T00:00:00Z`,
             endDate: `${data.endDate}T23:59:59Z`,
@@ -164,9 +171,19 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
                         type="text"
                         id="guest"
                         disabled={isWorking}
+                        autoComplete="off"
                         {...register('guest', {
                             required: 'This field is required',
+                            validate: (value) => {
+                                if (
+                                    !selectedGuest ||
+                                    selectedGuest.fullName !== value
+                                )
+                                    return 'You should to choose the guest from dropdown list or add new guest'
+                            },
                             onChange: () => {
+                                setSelectedGuest(null)
+
                                 handleInputChange(
                                     getValues().guest,
                                     guests,
@@ -185,25 +202,34 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
                 {listId === 'guest' && (
                     <DropDownList>
                         <DropDownList.List position={position}>
-                            {filtered.map((guest) => {
-                                return (
-                                    <DropDownList.Item
-                                        key={guest.id}
-                                        onClick={() => {
-                                            // устанавливаем значение поля ввода формы "guest"
-                                            setValue('guest', guest.fullName)
+                            {filtered
+                                .slice()
+                                .sort((a, b) => {
+                                    return a.fullName.localeCompare(b.fullName)
+                                    // return a.fullName > b.fullName
+                                })
+                                .map((guest) => {
+                                    return (
+                                        <DropDownList.Item
+                                            key={guest.id}
+                                            onClick={() => {
+                                                // устанавливаем значение поля ввода формы "guest"
+                                                setValue(
+                                                    'guest',
+                                                    guest.fullName,
+                                                )
 
-                                            // запоминаем выбранного гостя в состояние
-                                            setSelectedGuest(guest)
+                                                // запоминаем выбранного гостя в состояние
+                                                setSelectedGuest(guest)
 
-                                            // закрываем выпадающий список
-                                            closeDropdown()
-                                        }}
-                                    >
-                                        {guest.fullName}
-                                    </DropDownList.Item>
-                                )
-                            })}
+                                                // закрываем выпадающий список
+                                                closeDropdown()
+                                            }}
+                                        >
+                                            {guest.fullName}
+                                        </DropDownList.Item>
+                                    )
+                                })}
                         </DropDownList.List>
                     </DropDownList>
                 )}
@@ -217,9 +243,20 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
                         type="text"
                         id="cabin"
                         disabled={isWorking}
+                        autoComplete="off"
                         {...register('cabin', {
                             required: 'This field is required',
+                            validate: (value) => {
+                                if (
+                                    !selectedCabin ||
+                                    selectedCabin.name !== value
+                                )
+                                    return 'You should to choose the cabin from dropdown list or add new cabin'
+                            },
+
                             onChange: () => {
+                                setSelectedCabin(null)
+
                                 handleInputChange(
                                     getValues().cabin,
                                     cabins,
@@ -238,19 +275,25 @@ export default function CreateBookingForm({ onClose, newGuest, setNewGuest }) {
                 {listId === 'cabin' && (
                     <DropDownList>
                         <DropDownList.List position={position}>
-                            {filtered.map((cabin) => (
-                                <DropDownList.Item
-                                    key={cabin.id}
-                                    onClick={() => {
-                                        setValue('cabin', cabin.name)
-                                        setSelectedCabin(cabin)
+                            {filtered
+                                .slice()
+                                .sort((a, b) => {
+                                    return a.name.localeCompare(b.name)
+                                })
+                                .map((cabin) => (
+                                    <DropDownList.Item
+                                        key={cabin.id}
+                                        onClick={() => {
+                                            setValue('cabin', cabin.name)
+                                            setSelectedCabin(cabin)
+                                            console.log('cabin = ', cabin)
 
-                                        closeDropdown()
-                                    }}
-                                >
-                                    {cabin.name}
-                                </DropDownList.Item>
-                            ))}
+                                            closeDropdown()
+                                        }}
+                                    >
+                                        {cabin.name}
+                                    </DropDownList.Item>
+                                ))}
                         </DropDownList.List>
                     </DropDownList>
                 )}
